@@ -1,0 +1,117 @@
+---
+title: "Fire Counts Distribution"
+author: "Leonardo A. Saravia"
+date: "4/6/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Read fires from model
+ 
+```{r readpng, echo=T,message=F,warning=T,eval=TRUE}
+require(future.apply)
+require(lubridate)
+require(tidyverse)
+require(Matrix)
+require(spatialwarnings)
+require(gtools)
+source("R/functions.r")
+
+patch_df <- tibble()
+#
+# Density .8 Probability of Fire 2.0E-7 regrowth interval 2160 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.8.*2\\.0E-7.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+#
+# Density .6 Probability of Fire 2.0E-7 regrowth interval 2160 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.6.*2\\.0E-7.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+
+
+#
+# Density .6 Probability of Fire 2.0E-7 regrowth interval 2160 days 500 x 500
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.6.*2\\.0E-7.*500\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+#
+# Density .8 Probability of Fire 2.0E-7 regrowth interval 2160 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.8.*2\\.0E-7.*500\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+rm(df)
+save.image()
+
+#
+# Density .8 Probability of Fire 1.0E-6 regrowth interval 2160 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.8.*1\\.0E-6.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.8.*1\\.0E-6.*500\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+
+```
+
+# Plot Fires 
+ 
+```{r plotFires, echo=T,message=F,warning=T,eval=TRUE}
+
+names(patch_df) 
+patch_df %>% count(initial_forest_density,size)
+
+patch_pl <- patch_df %>% filter(type=="pl") %>% mutate(date=ymd("1990-01-01")+days, max_patch=max_patch/size,tot_patch=tot_patch/size) 
+
+ggplot(patch_pl,  aes(date,max_patch, color=factor(initial_forest_density))) + geom_line() + theme_bw() +
+      scale_color_viridis_d(name="Density")  + 
+      ylab("Max Patch Size") +  
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_wrap(~size)
+
+ggplot(patch_pl,  aes(date,tot_patch, color=factor(initial_forest_density))) + geom_line() + theme_bw() +
+      scale_color_viridis_d(name="Density")  + 
+      ylab("Total Patch Size") +  
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_wrap(~size)
+
+ggplot(patch_pl,  aes(date,npatches, color=factor(initial_forest_density))) + geom_line() + theme_bw() +
+      scale_color_viridis_d(name="Density")  + 
+      ylab("Number of Patches") +  
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))+ facet_wrap(~size)
+
+
+require(ggrepel)
+  #mutate( label =ifelse(date>="2019-11-01" & date<"2020-02-01",as.character(date),"")) %>%
+    
+  ggplot(patch_pl,  aes(npatches,tot_patch,color=factor(initial_forest_density) ))+ geom_point(alpha=0.6) + theme_bw() +
+      scale_color_viridis_d(guide=FALSE)  + 
+      xlab("Number of Patches") +  
+      ylab("Total Size (ha)") +  
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_wrap(~size) 
+    # + geom_label_repel(label=as.character(date)) 
+
+  ggsave("Figures/mdl_NumberVsSize_d06-08-pf2e-07.jpg",width=8,height=6,units="in",dpi=600)
+
+```
