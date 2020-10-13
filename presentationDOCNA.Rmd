@@ -1,0 +1,180 @@
+---
+title: "Fire forest dynamics: models and applications"
+subtitle: ""
+author:
+- Leonardo A. Saravia, [Universidad Nacional De General Sarmiento]
+- Giorgio Nicoletti, [Universidad de Padova]
+- Samir Suweis, [Universidad de Padova]
+date: "2020/10"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      countIncrementalSlides: false
+      countdown: 60000
+---
+name: jaguar
+class: inverse, top
+background-image: url(Figures/JaguarFire.jpg)
+background-size: contain
+
+## La dinámica del fuego depende de la cantidad de combustible
+
+---
+name: jaguarDark
+class: inverse, top
+background-image: url(Figures/JaguarFireDark.jpg)
+background-size: contain
+
+## La cantidad de combustible potencial depende de la biomasa acumulada
+
+--
+
+## Que ese combustible se prenda fuego depende de las condiciones ambientales
+
+--
+
+## La probabilidad de que haya un incendio (causas naturales o no)
+
+--
+
+## Las Condiciones ambientales favorables tales como sequía y altas temperaturas
+
+.footnote[Foto: Bomberos y voluntarios en el Pantanal, Brasil, han estado luchando para rescatar jaguares de incendios extremos.Crédito: Andre Penner/AP/Shutterstock]
+
+---
+
+class: inverse, top
+background-image: url(Figures/fireNL_500_2e-07.png)
+background-size: contain
+
+# Modelo Mínimo de Fuegos
+
+
+---
+
+class: inverse, top
+background-image: url(Figures/fireNL_500_2e-07Dark.png)
+background-size: contain
+
+# Modelo Mínimo de Fuegos
+
+## La densidad de bosque determinada por las condiciones ambientales (initial-forest-density)
+
+--
+
+## La probabilidad de ignición de fuegos por sitio (Fire-probability)
+
+--
+
+## El tiempo que tarda en recuperarse el bosque y acumularse el combustible (forest-regrowth)
+
+---
+
+# Modelo Mínimo de Fuegos
+
+.img40[
+![](Figures/mdl_DensityVsPatchSize_FireProb2e-07.jpg)
+]
+
+--
+
+* Hay un umbral:  si la densidad es menor a 0.6 los fuegos son siempre pequeños
+
+--
+
+* Cuando la densidad es mayor a 0.6 algunos años hay fuegos muy grandes
+
+
+---
+# Modelo Mínimo de Fuegos
+
+.img60[
+![](Figures/mdl_PatchSizeVsTime_Density08.jpg)
+]
+
+* Otro umbral: Si la probabilidad de fuegos es muy baja la intensidad es muy alta en tamaño y número 
+
+* Cuando la probabilidad de fuegos es más alta los fuegos son más pequeños en tamaño y número 
+
+
+---
+
+# Modelo Mínimo de Fuegos
+
+.img60[
+![](Figures/mdl_NumberVsSize_Dens08_FireProb.jpg)
+]
+
+* Otro umbral: Si la probabilidad de fuegos es muy baja la intensidad es muy alta en tamaño y número 
+
+* Cuando la probabilidad de fuegos es más alta los fuegos son más pequeños en tamaño y número 
+
+---
+class: inverse, top
+# Caso de los bosques templados de Australia
+
+.pull-left[
+![](Figures/FiresAustralia2018-2020.gif)]
+
+.pull-right[ 
+
+* Hay estacionalidad
+
+* La densidad de combustible varía con las condiciones ambientales
+
+* No hubo manejo adecuado del fuego
+
+]
+---
+# Caso de los bosques templados de Australia
+
+
+.img90[
+![](Figures/Aus_NumberVsSize_Month.jpg)
+]
+
+---
+class: inverse, top
+background-image: url(Figures/WildFiresFirefighters.jpg)
+background-size: contain
+
+# Soluciones Manejo del Fuego
+
+---
+class: inverse, top
+background-image: url(Figures/WildFiresFirefightersDark.jpg)
+background-size: contain
+
+# Soluciones Manejo del Fuego
+
+
+## Tratar de evitar incendios es una trampa (excepto en el Amazonas)
+
+--
+
+## permite que los combustibles se acumulen a niveles que superan las capacidades de cualquier servicio de extinción de incendios.
+
+--
+
+## Solución: administrar la cantidad de combustible a través de las quemas prescritas 
+
+--
+
+## En general son mal vistas por las poblaciones 
+
+
+
+---
+
+### Referencias
+.small[
+
+1. Bowman, D. M. J. S., Kolden, C. A., Abatzoglou, J. T., Johnston, F. H., van der Werf, G. R., and Flannigan, M. (2020). Vegetation fires in the Anthropocene. Nature Reviews Earth & Environment, 1–16. https://doi.org/10.1038/s43017-020-0085-3.
+
+2. Miller, R. K., Field, C. B., & Mach, K. J. (2020). Barriers and enablers for prescribed burns for wildfire management in California. Nature Sustainability, 3, 101–109. https://doi.org/10.1038/s41893‐019‐0451‐7
+
+2. Moreira, F., Ascoli, D., Safford, H., Adams, M. A., Moreno, J. M., Pereira, J. M. C., … Fernandes, P. M. (2020). Wildfire management in Mediterranean‐type regions: Paradigm change needed. Environmental Research Letters, 15, 011001. https://doi.org/10.1088/1748‐9326/ab541e
+
+]
