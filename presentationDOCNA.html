@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Fire forest dynamics: models and applications</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Leonardo A. Saravia, [Universidad Nacional De General Sarmiento]" />
+    <meta name="author" content="Giorgio Nicoletti, [Universidad de Padova]" />
+    <meta name="author" content="Samir Suweis, [Universidad de Padova]" />
+    <script src="libs/header-attrs-2.5/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/leo.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Fire forest dynamics: models and applications
+### Leonardo A. Saravia, [Universidad Nacional De General Sarmiento]
+### Giorgio Nicoletti, [Universidad de Padova]
+### Samir Suweis, [Universidad de Padova]
+### 2020/10
+
+---
+
+name: jaguar
+class: inverse, top
+background-image: url(Figures/JaguarFire.jpg)
+background-size: contain
+
+## La mayoría de los ecosistemas terrestres tienen la influencia del fuego
+
+
+
+---
+name: jaguarDark
+class: inverse, top
+background-image: url(Figures/JaguarFireDark.jpg)
+background-size: contain
+
+## La mayoría de los ecosistemas terrestres tienen la influencia del fuego
+
+
+## Depende de la interacción con el clima
+
+--
+
+## La acción humana: históricamente los nativos han manejado el fuego  
+
+--
+
+## La dinámica del fuego depende de la cantidad de combustible
+
+---
+name: jaguar
+class: inverse, top
+background-image: url(Figures/JaguarFire.jpg)
+background-size: contain
+
+## La cantidad de combustible potencial depende de la biomasa acumulada
+
+
+---
+name: jaguarDark
+class: inverse, top
+background-image: url(Figures/JaguarFireDark.jpg)
+background-size: contain
+
+
+## La cantidad de combustible potencial depende de la biomasa acumulada
+
+
+## Que ese combustible se prenda fuego depende de las condiciones ambientales
+
+--
+
+## La probabilidad de que haya un incendio (causas naturales o no)
+
+--
+
+## Las Condiciones ambientales favorables tales como sequía y altas temperaturas
+
+.footnote[Foto: Bomberos y voluntarios en el Pantanal, Brasil, han estado luchando para rescatar jaguares de incendios extremos.Crédito: Andre Penner/AP/Shutterstock]
+
+---
+
+class: inverse, top
+background-image: url(Figures/fireNL_500_2e-07.png)
+background-size: contain
+
+# Modelo Mínimo de Fuegos
+
+
+---
+
+class: inverse, top
+background-image: url(Figures/fireNL_500_2e-07Dark.png)
+background-size: contain
+
+# Modelo Mínimo de Fuegos
+
+## La densidad de bosque determinada por las condiciones ambientales (initial-forest-density)
+
+--
+
+## La probabilidad de ignición de fuegos por sitio (Fire-probability)
+
+--
+
+## El tiempo que tarda en recuperarse el bosque y acumularse el combustible (forest-regrowth)
+
+---
+
+# Modelo Mínimo de Fuegos
+
+.img40[
+![](Figures/mdl_DensityVsPatchSize_FireProb2e-07.jpg)
+]
+
+--
+
+* Hay un umbral:  si la densidad es menor a 0.6 los fuegos son siempre pequeños
+
+--
+
+* Cuando la densidad es mayor a 0.6 algunos años hay fuegos muy grandes
+
+
+---
+# Modelo Mínimo de Fuegos
+
+.img60[
+![](Figures/mdl_PatchSizeVsTime_Density08.jpg)
+]
+
+* Otro umbral: Si la probabilidad de fuegos es muy baja la intensidad es muy alta en tamaño y número 
+
+* Cuando la probabilidad de fuegos es más alta los fuegos son más pequeños en tamaño y número 
+
+
+---
+
+# Modelo Mínimo de Fuegos
+
+.img60[
+![](Figures/mdl_NumberVsSize_Dens08_FireProb.jpg)
+]
+
+* Otro umbral: Si la probabilidad de fuegos es muy baja la intensidad es muy alta en tamaño y número 
+
+* Cuando la probabilidad de fuegos es más alta los fuegos son más pequeños en tamaño y número 
+
+---
+class: inverse, top
+# Caso de los bosques templados de Australia
+
+.pull-left[
+![](Figures/FiresAustralia2018-2020.gif)]
+
+.pull-right[ 
+
+* Hay estacionalidad
+
+* La densidad de combustible varía con las condiciones ambientales
+
+* El Cambio Climático esta produciendo altas temperaturas y bajas precipitaciones
+
+* No hubo un manejo adecuado
+
+]
+---
+# Caso de los bosques templados de Australia
+
+
+.img90[
+![](Figures/Aus_NumberVsSize_Month.jpg)
+]
+
+---
+class: inverse, top
+background-image: url(Figures/WildFiresFirefighters.jpg)
+background-size: contain
+
+# Transiciones de Bosques a otro tipo de ecosistema
+
+---
+class: inverse, top
+background-image: url(Figures/WildFiresFirefightersDark.jpg)
+background-size: contain
+
+# Transiciones de Bosques a otro tipo de ecosistema
+
+
+## Vigilancia: Saber cuanto combustible se acumula o se acumulará de acuerdo a las condiciones ambientales
+
+--
+
+## Estimar para distintas regiones si es posible que se produzca esta transición
+
+--
+
+## Y las probabilidades de estas transiciones dependiendo de: 
+
+--
+
+## La acción antrópica y el cambio climático
+
+
+
+---
+# FIN
+
+* El modelo se puede acceder en 
+
+  http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/DynamicFireWeb.nlogo
+
+
+### Referencias
+
+
+.small[
+
+1. Bowman, D. M. J. S., Kolden, C. A., Abatzoglou, J. T., Johnston, F. H., van der Werf, G. R., and Flannigan, M. (2020). Vegetation fires in the Anthropocene. Nature Reviews Earth &amp; Environment, 1–16. https://doi.org/10.1038/s43017-020-0085-3.
+
+2. Miller, R. K., Field, C. B., &amp; Mach, K. J. (2020). Barriers and enablers for prescribed burns for wildfire management in California. Nature Sustainability, 3, 101–109. https://doi.org/10.1038/s41893‐019‐0451‐7
+
+2. Moreira, F., Ascoli, D., Safford, H., Adams, M. A., Moreno, J. M., Pereira, J. M. C., … Fernandes, P. M. (2020). Wildfire management in Mediterranean‐type regions: Paradigm change needed. Environmental Research Letters, 15, 011001. https://doi.org/10.1088/1748‐9326/ab541e
+
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"countIncrementalSlides": true
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+(function(time) {
+  var d2 = function(number) {
+    return ('0' + number).slice(-2); // left-pad 0 to minutes/seconds
+  },
+
+  time_format = function(total) {
+    var secs = Math.abs(total) / 1000;
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor(secs % 3600 / 60);
+    var s = Math.round(secs % 60);
+    var res = d2(m) + ':' + d2(s);
+    if (h > 0) res = h + ':' + res;
+    return res;  // [hh:]mm:ss
+  },
+
+  slide_number_div = function(i) {
+    return document.getElementsByClassName('remark-slide-number').item(i);
+  },
+
+  current_page_number = function(i) {
+    return slide_number_div(i).firstChild.textContent;  // text "i / N"
+  };
+
+  var timer = document.createElement('span'); timer.id = 'slide-time-left';
+  var time_left = time, k = slideshow.getCurrentSlideIndex(),
+      last_page_number = current_page_number(k);
+
+  setInterval(function() {
+    time_left = time_left - 1000;
+    timer.innerHTML = ' ' + time_format(time_left);
+    if (time_left < 0) timer.style.color = 'red';
+  }, 1000);
+
+  slide_number_div(k).appendChild(timer);
+
+  slideshow.on('showSlide', function(slide) {
+    var i = slide.getSlideIndex(), n = current_page_number(i);
+    // reset timer when a new slide is shown and the page number is changed
+    if (last_page_number !== n) {
+      time_left = time; last_page_number = n;
+      timer.innerHTML = ' ' + time_format(time); timer.style.color = null;
+    }
+    slide_number_div(i).appendChild(timer);
+  });
+})(60000);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
