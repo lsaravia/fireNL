@@ -1,5 +1,5 @@
 
-#' Extract images from DinamicFire NetLogo Model saved view 
+#' Extract images from DynamicFire NetLogo Model saved view 
 #' 
 #' The images were saved with the NetLogo extension CSV each 30 steps (ticks) after 7200 steps 
 #'
@@ -31,9 +31,9 @@ extract_patch_distr_nl <- function(fname,plot=FALSE){
           
     pl <- tibble::remove_rownames(data.frame(pl))
     patch_distr <- patchsizes(as.matrix(sm))
-    pl <- pl %>% mutate(max_patch = max(patch_distr),size=ss[h,6]*ss[h,7],tot_patch=sum(patch_distr),days = ss[h,5], 
-                        initial_forest_density= ss[h,2], fire_probability = ss[h,3],
-                        forest_regrowth= ss[h,4]
+    pl <- pl %>% mutate(max_patch = max(patch_distr),size=as.numeric(ss[h,7])*as.numeric(ss[h,8]),tot_patch=sum(patch_distr),days = ss[h,6], 
+                        initial_forest_density= ss[h,2], fire_probability = ss[h,3], forest_dispersal_distance = ss[h, 4],
+                        forest_growth= ss[h,5]
                         )
   }
   }, future.seed = TRUE)

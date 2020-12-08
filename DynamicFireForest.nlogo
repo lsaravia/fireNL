@@ -4,10 +4,15 @@ globals [
   initial-trees   ;; how many trees (green patches) we started with
   parar
   fire-patches    ;; number of patches that catch fire
+  powexp          ;; power law dispersla of forest
+  forest-growth-prob
+  total-forest
+  f-prob
 ]
 
 to setup
   clear-all
+
   ;
   ; Set initial number of patches
   ;
@@ -19,6 +24,7 @@ to setup
     resize-world 0 250 0 250
     set-patch-size 2
   ]
+  set total-forest world-width * world-height
 
   ask patches [
     if (random-float 1) < initial-forest-density [
@@ -26,14 +32,21 @@ to setup
     ]
   ]
 
+  ;;
+  ;; calculate power law exponent from dispersal distance, deriving the power exponent of a distribution with mean = birds-dispersal-distance
+  ;;
+  set powexp (1 - 2 * forest-dispersal-distance ) / (1 - forest-dispersal-distance )
+
+
   ;; keep track of how many trees there are
   set initial-trees count patches with [pcolor = green]
+  set f-prob  world-width * world-height * fire-probability
   set parar false
   ;print video
   if video [
           vid:reset-recorder
           vid:start-recorder
-          ; vid:record-interface
+          ;vid:record-interface
           vid:record-view
           ;print "Setup video"
         ]
@@ -47,31 +60,33 @@ to go
   if ticks = end-simulation or parar [
     if video [
         ;print "Guardo video!!!!!!!!!!!!"
-        let fname (word "DynamicFire_" initial-forest-density "_" fire-probability "_" forest-regrowth "_" ticks "_" world-height "_" world-width ".mp4")
+        let fname (word "DynamicFire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".mp4")
         vid:save-recording fname
     ]
     stop
   ]
-  let forest-regrowth-prob 1 / forest-regrowth
+  set forest-growth-prob 1 / forest-growth
 
   ;; Forest natural growth
-  ask patches with [pcolor = black] [
-    if random-float 1 < forest-growth
-    [
-      set pcolor green
+  ask patches with [pcolor = green ] [
+      grow-forest
+  ]
+  if periodicity [
+    if (remainder ticks 180 = 0) [
+      ifelse (remainder ticks 360 = 0) [
+        set f-prob  world-width * world-height * fire-probability
+      ][
+        set f-prob  world-width * world-height * fire-probability / 2
+      ]
     ]
   ]
-  set fire-patches random-poisson ( world-width * world-height * fire-probability )
+  ;print word "f-prob " f-prob
+  set fire-patches random-poisson f-prob
   ask n-of fire-patches patches [
       set pcolor red
   ]
 
   ;; Forest natural re-growth
-  ask patches with [ pcolor = red - 3.5 ] [
-    if random-float 1 < forest-regrowth-prob [
-      set pcolor green
-    ]
-  ]
 
   ask patches with [ pcolor = red ] [ ;; ask the burning trees
     ask neighbors4 with [pcolor = green] [ ;; ask their non-burning neighbor trees
@@ -84,10 +99,32 @@ to go
 ;; advance the clock by one “tick”
 end
 
+
+to grow-forest
+  if random-float 1 < forest-growth-prob
+  [
+    let effective-dispersal  random-power-law-distance 1 powexp
+
+    ask max-one-of patches in-radius effective-dispersal [distance self][
+      ;;show (word "in-radius eff-disp " effective-dispersal " - Real distance " distance centerpatch)
+      if pcolor != red [
+         set pcolor green
+      ]
+    ]
+  ]
+end
+
+to-report random-power-law-distance [ xmin alpha ]
+  ; median = xmin 2 ^( 1 / alpha )
+  let dis xmin * (random-float 1) ^ (-1 / ( alpha - 1 ))
+  if dis > world-width [set dis world-width]
+  report dis
+end
+
 to count-fires-export
   let mes (ticks mod 30)
 
-  if video and ticks > 7200 [
+  if video [
     ;vid:record-interface
     vid:record-view
   ]
@@ -95,17 +132,25 @@ to count-fires-export
   if ticks > 7200 and mes = 0 [
     if save-view [
     ;print (word "Modulo Ticks : " mes " - " ticks)
-      let fname (word "Data/Fire_" initial-forest-density "_" fire-probability "_" forest-regrowth "_" ticks "_" world-height "_" world-width ".txt")
+      let fname (word "Data/Fire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
       csv:to-file fname   [ (list pycor pxcor pcolor) ] of patches
     ]
   ]
 end
+
+to-report percent-burned
+  report (count patches with [shade-of? pcolor red]) / total-forest
+end
+
+to-report percent-forest
+  report (count patches with [pcolor = green]) / total-forest
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-241
-11
-751
-522
+260
+10
+770
+521
 -1
 -1
 2.0
@@ -129,13 +174,13 @@ ticks
 30.0
 
 MONITOR
-769
-303
-884
-348
+800
+305
+912
+350
 percent burned
-(count patches with [shade-of? pcolor red]) / initial-trees   * 100
-1
+percent-burned
+4
 1
 11
 
@@ -148,7 +193,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.8
+0.4
 0.1
 1
 %
@@ -189,10 +234,10 @@ NIL
 1
 
 SWITCH
-10
-386
-113
-419
+15
+480
+118
+513
 video
 video
 1
@@ -218,9 +263,9 @@ NIL
 
 SLIDER
 10
-250
+195
 182
-283
+228
 Fire-probability
 Fire-probability
 0
@@ -231,26 +276,11 @@ Fire-probability
 NIL
 HORIZONTAL
 
-SLIDER
-10
-295
-182
-328
-forest-regrowth
-forest-regrowth
-0
-6000
-2160.0
-30
-1
-NIL
-HORIZONTAL
-
 PLOT
-769
-10
-1183
-294
+800
+12
+1214
+296
 Fire dynamics
 NIL
 NIL
@@ -267,9 +297,9 @@ PENS
 
 SLIDER
 11
-204
+149
 183
-237
+182
 end-simulation
 end-simulation
 7200
@@ -281,21 +311,21 @@ NIL
 HORIZONTAL
 
 SWITCH
-10
-347
-167
-380
+15
+441
+172
+474
 world500x000
 world500x000
-0
+1
 1
 -1000
 
 SWITCH
-10
-427
-136
-460
+15
+521
+141
+554
 Save-view
 Save-view
 0
@@ -303,19 +333,56 @@ Save-view
 -1000
 
 SLIDER
-10
-155
-182
-188
+15
+305
+187
+338
 Forest-growth
 Forest-growth
 0
-3000
+6000
 1800.0
-1
+30
 1
 NIL
 HORIZONTAL
+
+SLIDER
+15
+275
+247
+308
+forest-dispersal-distance
+forest-dispersal-distance
+1.01
+10
+2.01
+0.01
+1
+NIL
+HORIZONTAL
+
+MONITOR
+800
+360
+915
+405
+Percent forest
+Percent-forest
+4
+1
+11
+
+SWITCH
+20
+360
+147
+393
+Periodicity
+Periodicity
+0
+1
+-1000
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
@@ -676,6 +743,43 @@ repeat 180 [ go ]
     </enumeratedValueSet>
     <enumeratedValueSet variable="random-seed">
       <value value="3121"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="DispersalEffect" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>percent-burned</metric>
+    <metric>percent-forest</metric>
+    <enumeratedValueSet variable="Fire-probability">
+      <value value="2.0E-7"/>
+      <value value="1.0E-6"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Save-view">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="world500x000">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="forest-dispersal-distance">
+      <value value="1.01"/>
+      <value value="2.01"/>
+      <value value="10.01"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="video">
+      <value value="true"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Forest-growth">
+      <value value="360"/>
+      <value value="1800"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="end-simulation">
+      <value value="14400"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Initial-forest-density">
+      <value value="0.4"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Periodicity">
+      <value value="true"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>

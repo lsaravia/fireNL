@@ -1,0 +1,222 @@
+---
+title: "Fire Counts Distribution"
+author: "Leonardo A. Saravia"
+date: "4/6/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Read Simulations from ForestFires model
+ 
+```{r readpng, echo=T,message=F,warning=T,eval=TRUE}
+require(future.apply)
+require(lubridate)
+require(tidyverse)
+require(Matrix)
+require(spatialwarnings)
+require(gtools)
+source("R/functions.r")
+
+# Initialize data.frame
+patch_df <- tibble()
+
+#
+# Density .4 Probability of Fire 2.0E-7, dispersla 1.01 forest growth 360 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*2\\.0E-7.*1\\.01.*_360.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+
+#
+# Density .4 Probability of Fire 2.0E-7, dispersla 1.01 forest growth 1800 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*2\\.0E-7.*1\\.01.*_1800.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+#file.remove(paste0("Data/",fire_bricks))
+
+#
+# Density .4 Probability of Fire 2.0E-7, dispersla 1.01 forest growth 360 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*2\\.0E-7.*10\\.01.*_360.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+#
+# Density .4 Probability of Fire 2.0E-7, dispersla 1.01 forest growth 1800 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*2\\.0E-7.*10\\.01.*_1800.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+#file.remove(paste0("Data/",fire_bricks))
+
+
+#
+# Density .4 Probability of Fire 1.0E-6, dispersla 1.01 forest growth 1800 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*1\\.0E-6.*1\\.01.*_1800.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+#file.remove(paste0("Data/",fire_bricks))
+
+# Density .4 Probability of Fire 1.0E-6, dispersla 1.01 forest growth 1800 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*1\\.0E-6.*1\\.01.*_360.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+#
+# Density .4 Probability of Fire 1.0E-6, dispersla 10.01 forest growth 1800 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*1\\.0E-6.*10\\.01.*_1800.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+# Density .4 Probability of Fire 1.0E-6, dispersla 10.01 forest growth 1800 days
+#
+fire_bricks <- list.files(path="Data",pattern="^Fire_0\\.4.*1\\.0E-6.*10\\.01.*_360.*251\\.txt$")
+fire_bricks <- mixedsort(fire_bricks)
+df <- extract_patch_distr_nl(fire_bricks)
+
+patch_df <- bind_rows(patch_df, df %>% arrange(days))
+
+names(patch_df)
+patch_df %>% distinct(initial_forest_density,fire_probability,forest_dispersal_distance,forest_growth)
+
+rm(df)
+save.image()
+```
+
+# Plot Fires 
+ 
+```{r plotFires, echo=T,message=F,warning=T,eval=TRUE}
+require(tidyverse)
+names(patch_df) 
+patch_df %>% count(initial_forest_density,fire_probability,size) %>% mutate(scaled_fire_probability = fire_probability/size)
+
+patch_pl <- patch_df %>% filter(type=="pl") %>% mutate(date=ymd("1990-01-01")+days, max_patch=max_patch/size,tot_patch=tot_patch/size, npatches = npatches/size) 
+patch_pl <- bind_rows(patch_pl, patch_df %>% filter(is.na(type)) %>% mutate(date=ymd("1990-01-01")+days,
+                                                                            max_patch=max_patch/size,tot_patch=tot_patch/size, npatches = npatches/size) )
+
+save.image()
+
+patch_pl %>%  
+ggplot(  aes(date,max_patch, color=factor(forest_dispersal_distance))) + geom_line() + theme_bw() +
+      scale_color_viridis_d(name="Dispersal")  + 
+      ylab("Max Patch Size") +  
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+
+patch_pl %>%  
+ggplot(  aes(date,tot_patch, color=factor(forest_dispersal_distance))) + geom_line() + theme_bw() +
+      scale_color_viridis_d(name="Dispersal")  + 
+      ylab("Tot Patch Size") +  
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+
+patch_pl %>%  
+ggplot(  aes(date,npatches, color=factor(forest_dispersal_distance))) + geom_line() + theme_bw() +
+      scale_color_viridis_d(name="Dispersal")  + 
+      ylab("Number of Patches") +  scale_y_log10() +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+
+
+#require(ggrepel)
+#mutate( label =ifelse(date>="2019-11-01" & date<"2020-02-01",as.character(date),"")) %>%
+names(patch_pl)
+# ,
+p1 <-patch_pl %>% filter(!(fire_probability==1e-06 & forest_dispersal_distance==10.01 & date=="2009-10-18")) %>% 
+  ggplot(  aes(npatches,tot_patch,color=factor(forest_dispersal_distance), label=date))+ geom_point(alpha=0.5) + theme_bw() +
+      scale_color_viridis_d(name="Dispersal")  + 
+      xlab("Number of Patches") +  
+      ylab("Total Size") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+    # + geom_label_repel(label=as.character(date)) 
+require(plotly)
+plotly::ggplotly(p1)
+p1
+ggsave("Figures/mdl_NumberVsSize.jpg",width=8,height=6,units="in",dpi=600)
+
+
+col <- viridisLite::viridis(2)
+
+p1 <-patch_pl %>% filter(!(fire_probability==1e-06 & forest_dispersal_distance==10.01 & date=="2009-10-18"), forest_dispersal_distance==10.01) %>% 
+  ggplot(  aes(npatches,tot_patch,color=factor(forest_dispersal_distance), label=date))+ geom_point(alpha=0.5,color=col[2]) + theme_bw() +
+      scale_color_viridis_d(guide=FALSE)  + 
+      xlab("Number of Patches") +  
+      ylab("Total Size") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+    # + geom_label_repel(label=as.character(date)) 
+require(plotly)
+plotly::ggplotly(p1)
+p1
+ggsave("Figures/mdl_NumberVsSize_dispersal10.jpg",width=8,height=6,units="in",dpi=600)
+
+
+p1 <-patch_pl %>% filter(!(fire_probability==1e-06 & forest_dispersal_distance==10.01 & date=="2009-10-18"), forest_dispersal_distance==1.01) %>% 
+  ggplot(  aes(npatches,tot_patch,color=factor(forest_dispersal_distance), label=date))+ geom_point(alpha=0.5,color=col[1]) + theme_bw() +
+      scale_color_viridis_d(guide=FALSE)  + 
+      xlab("Number of Patches") +  
+      ylab("Total Size") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+    # + geom_label_repel(label=as.character(date)) 
+require(plotly)
+plotly::ggplotly(p1)
+p1
+ggsave("Figures/mdl_NumberVsSize_dispersal01.jpg",width=8,height=6,units="in",dpi=600)
+
+#
+# Accumulated by year
+#
+
+patch_pl %>% mutate(year=year(date)) %>% group_by(fire_probability,forest_dispersal_distance, forest_growth,year) %>% summarise(tot_patch=sum(tot_patch),npatches=sum(npatches)) %>% 
+  ggplot(  aes(year,tot_patch, color=factor(forest_dispersal_distance))) + geom_line() + theme_bw() +
+      scale_color_viridis_d(name="Dispersal")  + 
+      ylab("Tot Patch Size") +  
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+
+col <- viridisLite::viridis(2)
+p1 <- patch_pl %>% filter(!(fire_probability==1e-06 & forest_dispersal_distance==10.01 & date=="2009-10-18"),forest_dispersal_distance==1.01) %>% mutate(year=year(date)) %>% group_by(fire_probability,forest_dispersal_distance, forest_growth,year) %>% summarise(tot_patch=sum(tot_patch),npatches=sum(npatches)) %>%
+  ggplot(  aes(npatches,tot_patch, label=year))+ geom_point(color=col[1],alpha=0.5) + theme_bw() +
+      xlab("Number of Patches") +  
+      ylab("Total Size") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+    # + geom_label_repel(label=as.character(date)) 
+require(plotly)
+plotly::ggplotly(p1)
+p1
+
+p1 <- patch_pl %>% filter(!(fire_probability==1e-06 & forest_dispersal_distance==10.01 & date=="2009-10-18"),forest_dispersal_distance==10.01) %>% mutate(year=year(date)) %>% group_by(fire_probability,forest_dispersal_distance, forest_growth,year) %>% summarise(tot_patch=sum(tot_patch),npatches=sum(npatches)) %>%
+  ggplot(  aes(npatches,tot_patch, label=year))+ geom_point(alpha=0.5,color=col[2]) + theme_bw() +
+      scale_color_viridis_d(name="Dispersal")  + 
+      xlab("Number of Patches") +  
+      ylab("Total Size") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) + facet_grid(fire_probability~forest_growth)
+    # + geom_label_repel(label=as.character(date)) 
+require(plotly)
+plotly::ggplotly(p1)
+p1
+
+
+```
