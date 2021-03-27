@@ -10,6 +10,13 @@ globals [
   f-prob
 ]
 
+patches-own [
+  last-fire-time    ; time of the last time the patch was burned
+  fire-interval     ; the time interval between the last two fires
+  number-of-fires   ; the number of times the patch was burned
+]
+
+
 to setup
   clear-all
 
@@ -30,6 +37,11 @@ to setup
     if (random-float 1) < initial-forest-density [
       set pcolor green
     ]
+    set fire-interval  0     ; the time interval between the last two fires
+    set last-fire-time 1     ; time of the last time the patch was burned
+    set number-of-fires 0    ; the number of times the patch was burned
+
+
   ]
 
   ;;
@@ -37,6 +49,10 @@ to setup
   ;;
   set powexp (1 - 2 * forest-dispersal-distance ) / (1 - forest-dispersal-distance )
 
+  ;;
+  ;; Calculate forest growth probability
+  ;;
+  set forest-growth-prob 1 / forest-growth
 
   ;; keep track of how many trees there are
   set initial-trees count patches with [pcolor = green]
@@ -55,7 +71,7 @@ to setup
 end
 
 to go
-  ; Detiene el modelo al llegar a 5000 ticks o al presionar Fin
+  ; Stops the model when ticks reach end-simulation or when pressing Stop Video button
   ;
   if ticks = end-simulation or parar [
     if video [
@@ -65,7 +81,6 @@ to go
     ]
     stop
   ]
-  set forest-growth-prob 1 / forest-growth
 
   ;; Forest natural growth
   ask patches with [pcolor = green ] [
@@ -76,27 +91,43 @@ to go
       ifelse (remainder ticks 360 = 0) [
         set f-prob  world-width * world-height * fire-probability
       ][
-        set f-prob  world-width * world-height * fire-probability / 2
+        let var-seasonality fire-prob-seasonality / 2
+        let alpha fire-prob-seasonality * fire-prob-seasonality / var-seasonality
+        let lambda fire-prob-seasonality / var-seasonality
+        let max-f-prob random-gamma alpha lambda
+
+        set f-prob  world-width * world-height * fire-probability * max-f-prob
       ]
     ]
   ]
   ;print word "f-prob " f-prob
   set fire-patches random-poisson f-prob
   ask n-of fire-patches patches [
-      set pcolor red
+      burn-patch
   ]
 
-  ;; Forest natural re-growth
-
+  ;; Fire spread
+  ;;
   ask patches with [ pcolor = red ] [ ;; ask the burning trees
     ask neighbors4 with [pcolor = green] [ ;; ask their non-burning neighbor trees
-      set pcolor red ;; to catch on fire
+      burn-patch
     ]
     set pcolor red - 3.5 ;; once the tree is burned, darken its color
   ]
   tick
   count-fires-export
 ;; advance the clock by one “tick”
+end
+
+
+
+to burn-patch
+
+  set pcolor red                                ;; to catch on fire
+  set fire-interval  ticks - last-fire-time     ;; the time interval between the last two fires
+  set last-fire-time ticks                      ;; time of the last time the patch was burned
+  set number-of-fires number-of-fires + 1         ;; the number of times the patch was burned
+
 end
 
 
@@ -193,7 +224,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.4
+0.2
 0.1
 1
 %
@@ -247,9 +278,9 @@ video
 BUTTON
 11
 94
-108
+118
 127
-Fin Video
+Stop Video
 set parar true
 NIL
 1
@@ -292,8 +323,8 @@ true
 true
 "" ""
 PENS
-"Burned" 1.0 0 -12251123 true "" "plot (count patches with [shade-of? pcolor red]) / initial-trees   * 100"
-"Active (x100)" 1.0 0 -2674135 true "" "plot (count patches with [pcolor = red]) / initial-trees   * 10000"
+"Burned" 1.0 0 -12251123 true "" "plot percent-burned * 100"
+"Active (x100)" 1.0 0 -2674135 true "" "plot (count patches with [pcolor = red]) / total-forest * 10000"
 
 SLIDER
 11
@@ -328,35 +359,35 @@ SWITCH
 554
 Save-view
 Save-view
-0
+1
 1
 -1000
 
 SLIDER
-15
-305
-187
-338
+10
+295
+182
+328
 Forest-growth
 Forest-growth
 0
 6000
-1800.0
+4140.0
 30
 1
 NIL
 HORIZONTAL
 
 SLIDER
-15
-275
-247
-308
+10
+250
+242
+283
 forest-dispersal-distance
 forest-dispersal-distance
 1.01
 10
-2.01
+5.11
 0.01
 1
 NIL
@@ -374,15 +405,70 @@ Percent-forest
 11
 
 SWITCH
-20
-360
-147
-393
+10
+335
+137
+368
 Periodicity
 Periodicity
 0
 1
 -1000
+
+SLIDER
+10
+375
+212
+408
+fire-prob-seasonality
+fire-prob-seasonality
+0
+30
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+PLOT
+940
+310
+1140
+460
+f-prob
+NIL
+NIL
+0.0
+10.0
+0.0
+0.2
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot f-prob"
+
+MONITOR
+800
+420
+927
+465
+mean fire interval
+mean [ fire-interval ] of patches with [ number-of-fires > 1 ]
+4
+1
+11
+
+MONITOR
+800
+475
+997
+520
+number of sites burned > 1 
+count patches with  [ number-of-fires > 1 ]
+4
+1
+11
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
@@ -717,7 +803,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.1.1
+NetLogo 6.2.0
 @#$#@#$#@
 set density 60.0
 setup

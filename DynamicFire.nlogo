@@ -4,6 +4,7 @@ globals [
   initial-trees   ;; how many trees (green patches) we started with
   parar
   fire-patches    ;; number of patches that catch fire
+  total-forest
 ]
 
 to setup
@@ -19,6 +20,8 @@ to setup
     resize-world 0 250 0 250
     set-patch-size 2
   ]
+  set total-forest world-width * world-height
+
 
   ask patches [
     if (random-float 1) < initial-forest-density [
@@ -33,8 +36,8 @@ to setup
   if video [
           vid:reset-recorder
           vid:start-recorder
-          ; vid:record-interface
-          vid:record-view
+          vid:record-interface
+          ;vid:record-view
           ;print "Setup video"
         ]
   reset-ticks
@@ -54,13 +57,6 @@ to go
   ]
   let forest-regrowth-prob 1 / forest-regrowth
 
-  ;; Forest natural growth
-  ask patches with [pcolor = black] [
-    if random-float 1 < forest-growth
-    [
-      set pcolor green
-    ]
-  ]
   set fire-patches random-poisson ( world-width * world-height * fire-probability )
   ask n-of fire-patches patches [
       set pcolor red
@@ -87,9 +83,9 @@ end
 to count-fires-export
   let mes (ticks mod 30)
 
-  if video and ticks > 7200 [
-    ;vid:record-interface
-    vid:record-view
+  if video [
+    vid:record-interface
+    ;vid:record-view
   ]
 
   if ticks > 7200 and mes = 0 [
@@ -134,8 +130,8 @@ MONITOR
 884
 348
 percent burned
-(count patches with [shade-of? pcolor red]) / initial-trees   * 100
-1
+(count patches with [shade-of? pcolor red]) / total-forest   * 100
+2
 1
 11
 
@@ -148,7 +144,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.8
+0.7
 0.1
 1
 %
@@ -225,7 +221,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.0E-6
+2.0E-7
 .0000001
 1
 NIL
@@ -240,7 +236,7 @@ forest-regrowth
 forest-regrowth
 0
 6000
-2160.0
+1800.0
 30
 1
 NIL
@@ -262,8 +258,8 @@ true
 true
 "" ""
 PENS
-"Burned" 1.0 0 -12251123 true "" "plot (count patches with [shade-of? pcolor red]) / initial-trees   * 100"
-"Active (x100)" 1.0 0 -2674135 true "" "plot (count patches with [pcolor = red]) / initial-trees   * 10000"
+"Burned" 1.0 0 -12251123 true "" "plot (count patches with [shade-of? pcolor red]) / total-forest   * 100"
+"Active (x100)" 1.0 0 -2674135 true "" "plot (count patches with [pcolor = red]) / total-forest   * 10000"
 
 SLIDER
 11
@@ -287,7 +283,7 @@ SWITCH
 380
 world500x000
 world500x000
-0
+1
 1
 -1000
 
@@ -298,24 +294,20 @@ SWITCH
 460
 Save-view
 Save-view
-0
+1
 1
 -1000
 
-SLIDER
-10
-155
-182
-188
-Forest-growth
-Forest-growth
-0
-3000
-1800.0
+MONITOR
+770
+360
+877
+405
+Percent Forest
+count patches with [pcolor = green] / total-forest * 100
+2
 1
-1
-NIL
-HORIZONTAL
+11
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
