@@ -1,13 +1,23 @@
-extensions [ vid csv]
+extensions [ vid csv time]
 
 globals [
-  initial-trees   ;; how many trees (green patches) we started with
+  ;initial-trees   ;; how many trees (green patches) we started with
   parar
   fire-patches    ;; number of patches that catch fire
   powexp          ;; power law dispersla of forest
   forest-growth-prob
   total-forest
   f-prob
+  start-fire-season
+  end-fire-season
+  fire-prob-list
+  burned-by-month             ; To calculate the burned area by month
+  previous-month-burned
+  actual-burned
+  tick-date                   ; anchor ticks to first date in the file
+  last-mes                    ; to control month changing
+  accum-mes
+
 ]
 
 patches-own [
@@ -32,6 +42,13 @@ to setup
     set-patch-size 2
   ]
   set total-forest world-width * world-height
+  set fire-prob-list []
+  if empty? fire-prob-filename [
+    set fire-prob-filename "Data/Predicted_bF_rcp45.csv"
+  ]
+
+  read-fire-prob              ; Read file with fire-probability
+  set accum-mes 0
 
   ask patches [
     if (random-float 1) < initial-forest-density [
@@ -54,8 +71,17 @@ to setup
   ;;
   set forest-growth-prob 1 / forest-growth
 
+  set start-fire-season int ( ( 365 / 2 ) - ( days-fire-season / 2 ) )
+  set end-fire-season   int ( start-fire-season + days-fire-season - 1 )
+
+  ;print (word "INICIO: " start-fire-season " FIN: " end-fire-season " f-prob: " f-prob)
+
   ;; keep track of how many trees there are
-  set initial-trees count patches with [pcolor = green]
+  ;set initial-trees count patches with [pcolor = green]
+  reset-ticks
+
+  set-fire-prob-by-month
+
   set f-prob  world-width * world-height * fire-probability
   set parar false
   ;print video
@@ -66,7 +92,6 @@ to setup
           vid:record-view
           ;print "Setup video"
         ]
-  reset-ticks
 
 end
 
@@ -86,20 +111,27 @@ to go
   ask patches with [pcolor = green ] [
       grow-forest
   ]
-  if periodicity [
-    if (remainder ticks 180 = 0) [
-      ifelse (remainder ticks 360 = 0) [
-        set f-prob  world-width * world-height * fire-probability
-      ][
-        let var-seasonality fire-prob-seasonality / 2
-        let alpha fire-prob-seasonality * fire-prob-seasonality / var-seasonality
-        let lambda fire-prob-seasonality / var-seasonality
-        let max-f-prob random-gamma alpha lambda
+  ifelse periodicity [
+    let day-of-year remainder ticks 365
+    if (day-of-year = start-fire-season ) [
 
-        set f-prob  world-width * world-height * fire-probability * max-f-prob
-      ]
+      set f-prob  world-width * world-height * fire-probability * increase-fire-prob-seasonality
+      ;print (word "INICIO Day-of-year: " day-of-year " f-prob: " f-prob)
+
     ]
+    if (day-of-year = end-fire-season ) [
+;        let var-seasonality increase-fire-prob-seasonality / 2
+;        let alpha increase-fire-prob-seasonality * increase-fire-prob-seasonality / var-seasonality
+;        let lambda increase-fire-prob-seasonality / var-seasonality
+;        let max-f-prob random-gamma alpha lambda
+      set f-prob  world-width * world-height * fire-probability
+      ;print (word "FIN Day-of-year: " day-of-year " f-prob: " f-prob)
+
+    ]
+  ][
+    set-fire-prob-by-month
   ]
+
   ;print word "f-prob " f-prob
   set fire-patches random-poisson f-prob
   ask n-of fire-patches patches [
@@ -176,11 +208,74 @@ end
 to-report percent-forest
   report (count patches with [pcolor = green]) / total-forest
 end
+
+to-report active-burned
+  report (count patches with [pcolor = red]) / total-forest
+end
+
+
+to read-fire-prob
+  if file-exists? fire-prob-filename [
+    file-open fire-prob-filename ; open the file with the turtle data
+                                            ;; To skip the header row in the while loop,
+                                            ;  read the header row here to move the cursor down to the next line.
+    let headings csv:from-row file-read-line
+    let first-fecha ""
+
+    ; We'll read all the data in a single loop
+    while [ not file-at-end? ] [
+
+      ; here the CSV extension grabs a single line and puts the read data in a list
+      let fire_data csv:from-row file-read-line
+      ;print fire_data
+      let fecha        item 0 fire_data
+      if empty? first-fecha [ set first-fecha fecha]
+      let fireP        item 1 fire_data
+      ;print (word "Date: " fecha " ProbFire: " fireP )
+      set fire-prob-list lput fireP fire-prob-list
+    ]
+    file-close ; make sure to close the file
+    set periodicity false
+    set tick-date time:anchor-to-ticks (time:create first-fecha) 1 "days"
+    set end-simulation (length fire-prob-list) * 31                                 ; Simulate all the time in the file
+  ]
+end
+
+
+
+to set-fire-prob-by-month
+  if not empty? fire-prob-list [
+    let new-mes time:get "month" tick-date
+
+
+    set actual-burned actual-burned + active-burned
+
+    if last-mes != new-mes [
+      set last-mes new-mes
+      set fire-probability item accum-mes fire-prob-list
+      set burned-by-month  actual-burned
+      set actual-burned 0
+
+      ;print (word "mes: " accum-mes " fire-prob: " fire-probability " Monthly burned: " burned-by-month  " Fecha: " ( time:show tick-date "yyyy-MM-dd" ))
+      set accum-mes accum-mes + 1
+      if accum-mes  = ( length fire-prob-list ) [ set parar true ]
+
+    ]
+  ]
+end
+
+to export-fire-interval
+
+    ;print (word "Modulo Ticks : " mes " - " ticks)
+  let fname (word "Data/FireInterval_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
+  csv:to-file fname   [ (list pycor pxcor fire-interval) ] of patches
+
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
-260
+275
 10
-770
+785
 521
 -1
 -1
@@ -224,7 +319,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.2
+0.1
 0.1
 1
 %
@@ -266,9 +361,9 @@ NIL
 
 SWITCH
 15
-480
+520
 118
-513
+553
 video
 video
 1
@@ -301,7 +396,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.0E-6
+1.3040349103855413E-5
 .0000001
 1
 NIL
@@ -318,13 +413,13 @@ NIL
 0.0
 10.0
 0.0
-10.0
+1.0
 true
 true
 "" ""
 PENS
-"Burned" 1.0 0 -12251123 true "" "plot percent-burned * 100"
-"Active (x100)" 1.0 0 -2674135 true "" "plot (count patches with [pcolor = red]) / total-forest * 10000"
+"Burned" 1.0 0 -12251123 true "" "plot burned-by-month * 100\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks                                       \n]"
+"Active (x100)" 1.0 0 -2674135 true "" "plot active-burned * 100"
 
 SLIDER
 11
@@ -334,8 +429,8 @@ SLIDER
 end-simulation
 end-simulation
 7200
-14400
-14400.0
+14760
+14942.0
 360
 1
 NIL
@@ -343,9 +438,9 @@ HORIZONTAL
 
 SWITCH
 15
-441
+481
 172
-474
+514
 world500x000
 world500x000
 1
@@ -354,9 +449,9 @@ world500x000
 
 SWITCH
 15
-521
+561
 141
-554
+594
 Save-view
 Save-view
 1
@@ -372,7 +467,7 @@ Forest-growth
 Forest-growth
 0
 6000
-4140.0
+360.0
 30
 1
 NIL
@@ -387,7 +482,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 10
-5.11
+2.0
 0.01
 1
 NIL
@@ -411,20 +506,20 @@ SWITCH
 368
 Periodicity
 Periodicity
-0
+1
 1
 -1000
 
 SLIDER
 10
 375
-212
+272
 408
-fire-prob-seasonality
-fire-prob-seasonality
+increase-fire-prob-seasonality
+increase-fire-prob-seasonality
 0
 30
-1.0
+10.0
 1
 1
 NIL
@@ -435,18 +530,18 @@ PLOT
 310
 1140
 460
-f-prob
+fire-prob
 NIL
 NIL
 0.0
 10.0
 0.0
-0.2
+1.0E-4
 true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot f-prob"
+"default" 1.0 0 -16777216 true "" "plot fire-probability"
 
 MONITOR
 800
@@ -454,7 +549,7 @@ MONITOR
 927
 465
 mean fire interval
-mean [ fire-interval ] of patches with [ number-of-fires > 1 ]
+mean [ fire-interval ] of patches with [ last-fire-time > 7200 ]
 4
 1
 11
@@ -467,6 +562,43 @@ MONITOR
 number of sites burned > 1 
 count patches with  [ number-of-fires > 1 ]
 4
+1
+11
+
+SLIDER
+15
+425
+187
+458
+days-fire-season
+days-fire-season
+0
+180
+90.0
+1
+1
+NIL
+HORIZONTAL
+
+INPUTBOX
+15
+610
+257
+670
+fire-prob-filename
+Data/Estimated_bF.csv
+1
+0
+String
+
+MONITOR
+800
+530
+1002
+575
+Date
+time:show tick-date \"yyyy-MM-dd\"
+17
 1
 11
 
