@@ -104,6 +104,7 @@ to go
         let fname (word "DynamicFire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".mp4")
         vid:save-recording fname
     ]
+    export-fire-interval
     stop
   ]
 
@@ -252,7 +253,7 @@ to set-fire-prob-by-month
 
     if last-mes != new-mes [
       set last-mes new-mes
-      set fire-probability item accum-mes fire-prob-list
+      set fire-probability item accum-mes fire-prob-list / 30           ; Monthly probability have to be divided by 30
       set burned-by-month  actual-burned
       set actual-burned 0
 
@@ -267,9 +268,13 @@ end
 to export-fire-interval
 
     ;print (word "Modulo Ticks : " mes " - " ticks)
-  let fname (word "Data/FireInterval_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
+  let fname (word "Data/FireInterval_" nlrx-experiment "_" initial-forest-density  "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
   csv:to-file fname   [ (list pycor pxcor fire-interval) ] of patches
 
+end
+
+to-report Date
+  report time:show tick-date "yyyy-MM-dd"
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -396,7 +401,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.3040349103855413E-5
+3.152214787451928E-6
 .0000001
 1
 NIL
@@ -536,7 +541,7 @@ NIL
 0.0
 10.0
 0.0
-1.0E-4
+1.0E-5
 true
 false
 "" ""
@@ -597,10 +602,21 @@ MONITOR
 1002
 575
 Date
-time:show tick-date \"yyyy-MM-dd\"
+Date
 17
 1
 11
+
+INPUTBOX
+15
+680
+257
+740
+nlrx-experiment
+NIL
+1
+0
+String
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
@@ -943,26 +959,6 @@ repeat 180 [ go ]
 @#$#@#$#@
 @#$#@#$#@
 <experiments>
-  <experiment name="FireRegimes" repetitions="1" runMetricsEveryStep="true">
-    <setup>setup</setup>
-    <go>go</go>
-    <metric>count turtles</metric>
-    <enumeratedValueSet variable="Fire-probability">
-      <value value="2.0E-7"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="forest-regrowth">
-      <value value="2190"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="video">
-      <value value="false"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="Initial-forest-density">
-      <value value="0.8"/>
-    </enumeratedValueSet>
-    <enumeratedValueSet variable="random-seed">
-      <value value="3121"/>
-    </enumeratedValueSet>
-  </experiment>
   <experiment name="DispersalEffect" repetitions="1" runMetricsEveryStep="true">
     <setup>setup</setup>
     <go>go</go>
@@ -998,6 +994,47 @@ repeat 180 [ go ]
     </enumeratedValueSet>
     <enumeratedValueSet variable="Periodicity">
       <value value="true"/>
+    </enumeratedValueSet>
+  </experiment>
+  <experiment name="FireRegimes" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+    <enumeratedValueSet variable="Fire-probability">
+      <value value="1.3040349103855413E-5"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="increase-fire-prob-seasonality">
+      <value value="10"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="days-fire-season">
+      <value value="90"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="fire-prob-filename">
+      <value value="&quot;Data/Estimated_bF.csv&quot;"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Save-view">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="world500x000">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="forest-dispersal-distance">
+      <value value="2"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Forest-growth">
+      <value value="360"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="video">
+      <value value="false"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="end-simulation">
+      <value value="14942"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Initial-forest-density">
+      <value value="0.1"/>
+    </enumeratedValueSet>
+    <enumeratedValueSet variable="Periodicity">
+      <value value="false"/>
     </enumeratedValueSet>
   </experiment>
 </experiments>
