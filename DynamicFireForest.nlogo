@@ -33,14 +33,14 @@ to setup
   ;
   ; Set initial number of patches
   ;
-  ifelse world500x000 [
-    resize-world 0 499 0 499
-    set-patch-size 1
+  ;ifelse world500x000 [
+  ;  resize-world 0 499 0 499
+  ;  set-patch-size 1
 
-  ][
-    resize-world 0 250 0 250
-    set-patch-size 2
-  ]
+  ;][
+  ;  resize-world 0 249 0 249
+  ;  set-patch-size 2
+  ;]
   set total-forest world-width * world-height
   set fire-prob-list []
   if empty? fire-prob-filename [
@@ -280,8 +280,8 @@ end
 GRAPHICS-WINDOW
 275
 10
-785
-521
+783
+519
 -1
 -1
 2.0
@@ -295,9 +295,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-250
+249
 0
-250
+249
 1
 1
 1
@@ -324,7 +324,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.1
+0.6
 0.1
 1
 %
@@ -401,7 +401,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-3.152214787451928E-6
+4.346783034618471E-7
 .0000001
 1
 NIL
@@ -472,7 +472,7 @@ Forest-growth
 Forest-growth
 0
 6000
-360.0
+1500.0
 30
 1
 NIL
