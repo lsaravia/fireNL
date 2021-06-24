@@ -43,11 +43,11 @@ to setup
   ;]
   set total-forest world-width * world-height
   set fire-prob-list []
-  if empty? fire-prob-filename [
-    set fire-prob-filename "Data/Predicted_bF_rcp45.csv"
+  if not empty? fire-prob-filename [
+    ;set fire-prob-filename "Data/Predicted_bF_rcp45.csv"
+    read-fire-prob              ; Read file with fire-probability
   ]
 
-  read-fire-prob              ; Read file with fire-probability
   set accum-mes 0
 
   ask patches [
@@ -324,7 +324,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.6
+0.3
 0.1
 1
 %
@@ -401,7 +401,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-4.346783034618471E-7
+1.1E-6
 .0000001
 1
 NIL
@@ -435,7 +435,7 @@ end-simulation
 end-simulation
 7200
 14760
-14942.0
+14760.0
 360
 1
 NIL
@@ -472,7 +472,7 @@ Forest-growth
 Forest-growth
 0
 6000
-1500.0
+3030.0
 30
 1
 NIL
@@ -487,7 +487,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 10
-2.0
+1.86
 0.01
 1
 NIL
@@ -511,7 +511,7 @@ SWITCH
 368
 Periodicity
 Periodicity
-1
+0
 1
 -1000
 
@@ -591,7 +591,7 @@ INPUTBOX
 257
 670
 fire-prob-filename
-Data/Estimated_bF.csv
+NIL
 1
 0
 String
