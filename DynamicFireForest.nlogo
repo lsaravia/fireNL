@@ -24,6 +24,7 @@ patches-own [
   last-fire-time    ; time of the last time the patch was burned
   fire-interval     ; the time interval between the last two fires
   number-of-fires   ; the number of times the patch was burned
+  cluster-label             ; find clusters (patches)
 ]
 
 
@@ -43,11 +44,11 @@ to setup
   ;]
   set total-forest world-width * world-height
   set fire-prob-list []
-  if empty? fire-prob-filename [
-    set fire-prob-filename "Data/Predicted_bF_rcp45.csv"
+  if not empty? fire-prob-filename [
+    ;set fire-prob-filename "Data/Predicted_bF_rcp45.csv"
+    read-fire-prob              ; Read file with fire-probability
   ]
 
-  read-fire-prob              ; Read file with fire-probability
   set accum-mes 0
 
   ask patches [
@@ -104,7 +105,7 @@ to go
         let fname (word "DynamicFire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".mp4")
         vid:save-recording fname
     ]
-    export-fire-interval
+    ;export-fire-interval
     stop
   ]
 
@@ -245,7 +246,7 @@ end
 
 
 to set-fire-prob-by-month
-  if not empty? fire-prob-list [
+  ifelse not empty? fire-prob-list [
     let new-mes time:get "month" tick-date
 
 
@@ -258,8 +259,20 @@ to set-fire-prob-by-month
       set actual-burned 0
 
       ;print (word "mes: " accum-mes " fire-prob: " fire-probability " Monthly burned: " burned-by-month  " Fecha: " ( time:show tick-date "yyyy-MM-dd" ))
+
+      ;print word "Patch sizes: " burned-clusters 30
       set accum-mes accum-mes + 1
       if accum-mes  = ( length fire-prob-list ) [ set parar true ]
+
+    ]
+  ][
+    let new-mes int ( ticks / 30 )
+    set actual-burned actual-burned + active-burned
+    if last-mes != new-mes [
+      set last-mes new-mes
+      set burned-by-month  actual-burned
+      set actual-burned 0
+      ;print (word "mes: " new-mes " last-mes: " last-mes " Monthly burned: " burned-by-month )
 
     ]
   ]
@@ -276,6 +289,79 @@ end
 to-report Date
   report time:show tick-date "yyyy-MM-dd"
 end
+
+;
+; Hoshen–Kopelman algorithm for burned patches of the last "days" ticks
+;
+to-report burned-clusters [days]
+  let x min-pxcor
+  let y min-pycor
+  let cluster-sizes []
+  let month-burned patches with [last-fire-time >= ticks - days] ;
+  ask month-burned [ set cluster-label 0 ]
+  set month-burned sort month-burned
+  let largest-label 0
+
+  ;
+  ; label clusters
+  ;
+  foreach month-burned [
+    t -> ask t [
+
+      let pleft patch-at -1 0  ; same row to the left x-1
+      let pabove patch-at 0 1  ; same column abobew   y+1
+      ifelse  not member? pabove month-burned and not member? pleft month-burned [
+        ;show "NO neighbor!!!!"
+
+        set largest-label largest-label + 1
+        set cluster-label largest-label
+      ][
+        ifelse member? pleft month-burned and not member? pabove month-burned [
+          ;show "LEFT neighbor!!!!"
+          set cluster-label [cluster-label] of pleft
+        ][
+          ifelse member? pabove month-burned and not member? pleft month-burned [
+            ;show "ABOVE neighbor!!!!"
+            set cluster-label [cluster-label] of pabove
+          ][
+            ;show "BOTH neighbors!!!"
+            let lblabove [cluster-label] of pabove
+            let lblleft  [cluster-label] of pleft
+            ifelse lblleft = lblabove [
+              set cluster-label lblleft
+            ][
+              ifelse lblleft < lblabove [
+                set cluster-label lblleft
+                foreach month-burned [r -> ask r [ if cluster-label = lblabove[ set cluster-label lblleft] ] ]
+              ][
+                set cluster-label lblabove
+                foreach month-burned [r -> ask r [ if cluster-label = lblleft [ set cluster-label lblabove] ] ]
+              ]
+            ]
+
+
+          ]
+        ]
+      ]
+    ]
+  ]
+
+  ;
+  ;
+  ;
+  set month-burned patches with [member? self month-burned]
+  let label-list [cluster-label] of month-burned
+  ;print word "label-list: " label-list
+  set label-list remove-duplicates label-list
+  ;print word "label-list: " label-list
+
+  foreach label-list [
+    t -> set cluster-sizes lput count month-burned with [cluster-label = t] cluster-sizes
+  ]
+  report cluster-sizes
+
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 275
@@ -401,7 +487,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.0E-6
+1.6866368400830106E-6
 .0000001
 1
 NIL
@@ -487,7 +573,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 10
-2.0
+1.86
 0.01
 1
 NIL
@@ -533,8 +619,8 @@ HORIZONTAL
 PLOT
 940
 310
-1140
-460
+1225
+570
 fire-prob
 NIL
 NIL
@@ -561,9 +647,9 @@ mean [ fire-interval ] of patches with [ last-fire-time > 7200 ]
 
 MONITOR
 800
-475
+590
 997
-520
+635
 number of sites burned > 1 
 count patches with  [ number-of-fires > 1 ]
 4
@@ -598,9 +684,9 @@ String
 
 MONITOR
 800
-530
+645
 1002
-575
+690
 Date
 Date
 17
