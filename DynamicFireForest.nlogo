@@ -217,7 +217,7 @@ end
 
 
 to read-fire-prob
-  if file-exists? fire-prob-filename [
+  ifelse file-exists? fire-prob-filename [
     file-open fire-prob-filename ; open the file with the turtle data
                                             ;; To skip the header row in the while loop,
                                             ;  read the header row here to move the cursor down to the next line.
@@ -240,6 +240,9 @@ to read-fire-prob
     set periodicity false
     set tick-date time:anchor-to-ticks (time:create first-fecha) 1 "days"
     set end-simulation (length fire-prob-list) * 31                                 ; Simulate all the time in the file
+  ][
+
+    set tick-date time:anchor-to-ticks (time:create "2001-01-01") 1 "days"
   ]
 end
 
@@ -361,7 +364,6 @@ to-report burned-clusters [days]
   report cluster-sizes
 
 end
-
 @#$#@#$#@
 GRAPHICS-WINDOW
 275
@@ -487,7 +489,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.6866368400830106E-6
+1.0E-6
 .0000001
 1
 NIL
@@ -521,7 +523,7 @@ end-simulation
 end-simulation
 7200
 14760
-14942.0
+7200.0
 360
 1
 NIL
@@ -677,7 +679,7 @@ INPUTBOX
 257
 670
 fire-prob-filename
-Data/Estimated_bF.csv
+Data/Estimated_bF.ppp
 1
 0
 String
