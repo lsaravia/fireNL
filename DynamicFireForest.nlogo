@@ -257,7 +257,6 @@ to read-fire-prob
 end
 
 
-
 to set-fire-prob-by-month
   ifelse not empty? fire-prob-list [
     let new-mes time:get "month" tick-date
@@ -268,8 +267,8 @@ to set-fire-prob-by-month
     if last-mes != new-mes [
       set last-mes new-mes
       ifelse use-fire-prob-se [
-        let fire-prob-mean ln item accum-mes fire-prob-list
-        let fire-prob-se item accum-mes fire-prob-list-se
+        let fire-prob-mean ln item accum-mes fire-prob-list                                   ; prediction model has ln scale
+        let fire-prob-se item accum-mes fire-prob-list-se                                     ; se was not exponentiated so no convertion is needed
         set fire-probability exp ( random-normal fire-prob-mean fire-prob-se ) / 30           ; Monthly probability have to be divided by 30
         ;print (word "mes: " accum-mes " fire-prob: " fire-probability " Fire-prob-mean: " fire-prob-mean  " Fire-prob-se: " fire-prob-se " Fecha: " ( time:show tick-date "yyyy-MM-dd" ))
 
@@ -511,7 +510,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.2261977937266881E-6
+1.4072165132416379E-6
 .0000001
 1
 NIL
