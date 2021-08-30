@@ -119,6 +119,7 @@ to go
       grow-forest
   ]
   ifelse periodicity [
+    set-fire-prob-by-month
     let day-of-year remainder ticks 365
     if (day-of-year = start-fire-season ) [
 
@@ -137,9 +138,11 @@ to go
     ]
   ][
     set-fire-prob-by-month
+    set f-prob  world-width * world-height * fire-probability
   ]
 
   ;print word "f-prob " f-prob
+  ;print word "fire-probability " fire-probability
   set fire-patches random-poisson f-prob
   ask n-of fire-patches patches [
       burn-patch
@@ -433,7 +436,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.5
+0.6
 0.1
 1
 %
@@ -510,7 +513,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.4072165132416379E-6
+7.300500853956186E-7
 .0000001
 1
 NIL
@@ -532,7 +535,7 @@ true
 true
 "" ""
 PENS
-"Burned" 1.0 0 -12251123 true "" "plot burned-by-month * 100\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks                                       \n]"
+"Burned" 1.0 0 -12251123 true "" "plot burned-by-month * 100\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks                                       \n]\nif ticks mod 1095 = 0 \n[\n  set-plot-y-range 0  0.5                                        \n]"
 "Active (x100)" 1.0 0 -2674135 true "" "plot active-burned * 100"
 
 SLIDER
@@ -544,7 +547,7 @@ end-simulation
 end-simulation
 7200
 14760
-15283.0
+18631.0
 360
 1
 NIL
@@ -570,7 +573,7 @@ Forest-growth
 Forest-growth
 0
 6000
-1420.0
+1170.0
 10
 1
 NIL
@@ -585,7 +588,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 10
-1.61
+1.54
 0.01
 1
 NIL
@@ -644,7 +647,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -16777216 true "" "plot fire-probability"
+"default" 1.0 0 -16777216 true "" "plot f-prob"
 
 MONITOR
 800
@@ -652,7 +655,7 @@ MONITOR
 927
 465
 mean fire interval
-mean [ fire-interval ] of patches with [ last-fire-time > 7200  and number-of-fires > 1]
+mean [ fire-interval ] of patches with [ last-fire-time > (ticks - 3650 ) and number-of-fires > 2]
 4
 1
 11
@@ -726,6 +729,42 @@ use-fire-prob-se
 0
 1
 -1000
+
+PLOT
+1240
+10
+1590
+290
+Fire-interval
+NIL
+NIL
+0.0
+3500.0
+0.0
+10.0
+true
+false
+"set-plot-x-range 0 10000\nset-histogram-num-bars 20" ""
+PENS
+"default" 1.0 1 -16777216 true "" "histogram [fire-interval] of patches with [ number-of-fires > 2 and last-fire-time > (ticks - 3650 )]"
+
+PLOT
+1240
+310
+1590
+570
+Forest %
+NIL
+NIL
+0.0
+10.0
+0.0
+1.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -13840069 true "" "plot percent-forest\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks \n]\n\nif ticks mod 360 = 0 \n[\n  set-plot-y-range 0  precision ( percent-forest * 2)  2                                      \n]"
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
