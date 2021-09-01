@@ -513,7 +513,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-7.300500853956186E-7
+4.346783034618471E-7
 .0000001
 1
 NIL
@@ -547,7 +547,7 @@ end-simulation
 end-simulation
 7200
 14760
-18631.0
+14911.0
 360
 1
 NIL
@@ -573,7 +573,7 @@ Forest-growth
 Forest-growth
 0
 6000
-1170.0
+1760.0
 10
 1
 NIL
@@ -588,7 +588,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 10
-1.54
+2.81
 0.01
 1
 NIL
@@ -681,7 +681,7 @@ INPUTBOX
 257
 670
 fire-prob-filename
-Data/Predicted_bF_rcp45.csv
+Data/Estimated_bF.csv
 1
 0
 String
