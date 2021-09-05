@@ -478,9 +478,9 @@ NIL
 
 SWITCH
 15
-495
+525
 118
-528
+558
 video
 video
 1
@@ -507,13 +507,13 @@ NIL
 SLIDER
 10
 195
-182
+240
 228
 Fire-probability
 Fire-probability
 0
 .00001
-4.346783034618471E-7
+6.376698828291156E-7
 .0000001
 1
 NIL
@@ -547,7 +547,7 @@ end-simulation
 end-simulation
 7200
 14760
-14911.0
+14973.0
 360
 1
 NIL
@@ -555,9 +555,9 @@ HORIZONTAL
 
 SWITCH
 15
-536
+566
 141
-569
+599
 Save-view
 Save-view
 1
@@ -587,8 +587,8 @@ SLIDER
 forest-dispersal-distance
 forest-dispersal-distance
 1.01
-10
-2.81
+100
+1.01
 0.01
 1
 NIL
@@ -606,10 +606,10 @@ Percent-forest
 11
 
 SWITCH
-10
-335
-137
-368
+15
+370
+142
+403
 Periodicity
 Periodicity
 1
@@ -617,10 +617,10 @@ Periodicity
 -1000
 
 SLIDER
-10
-375
-272
-408
+15
+415
+255
+448
 increase-fire-prob-seasonality
 increase-fire-prob-seasonality
 0
@@ -655,16 +655,16 @@ MONITOR
 927
 465
 mean fire interval
-mean [ fire-interval ] of patches with [ last-fire-time > (ticks - 3650 ) and number-of-fires > 2]
+median [ fire-interval ] of patches with [ last-fire-time > (ticks - 3650 ) and number-of-fires > 2]
 4
 1
 11
 
 SLIDER
 15
-425
+460
 187
-458
+493
 days-fire-season
 days-fire-season
 0
@@ -726,7 +726,7 @@ SWITCH
 643
 use-fire-prob-se
 use-fire-prob-se
-0
+1
 1
 -1000
 
@@ -765,6 +765,17 @@ false
 "" ""
 PENS
 "default" 1.0 0 -13840069 true "" "plot percent-forest\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks \n]\n\nif ticks mod 360 = 0 \n[\n  set-plot-y-range 0  precision ( percent-forest * 2)  2                                      \n]"
+
+MONITOR
+480
+610
+667
+655
+Forest power law exponent
+powexp
+4
+1
+11
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
