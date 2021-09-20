@@ -239,7 +239,12 @@ to-report active-burned
 end
 
 to-report median-fire-interval
-   report median [ fire-interval ] of patches with [ last-fire-time > (ticks - 7300 ) and number-of-fires > 2]
+  let p-with-fire patches with [ last-fire-time > (ticks - 7300 ) and number-of-fires > 2]
+  ifelse any? p-with-fire [
+     report median [ fire-interval ] of p-with-fire
+  ][
+    report 0
+  ]
 end
 
 to-report percent-deforested
@@ -578,7 +583,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-4.346783034618471E-7
+6.376698828291156E-7
 .0000001
 1
 NIL
