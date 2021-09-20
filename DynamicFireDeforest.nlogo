@@ -57,14 +57,19 @@ to setup
   set accum-mes 0
 
   ask patches [
-    if (random-float 1) < initial-forest-density [
-      set pcolor green
-    ]
     set fire-interval  0     ; the time interval between the last two fires
     set last-fire-time 1     ; time of the last time the patch was burned
     set number-of-fires 0    ; the number of times the patch was burned
     set deforested false
     set deforested-time 1    ; the time of deforestation
+    ;
+    if (random-float 1) < initial-deforested-density [
+      ;show " Initial deforestation "
+
+      set deforested true
+      set pcolor green
+      sprout 1 [set color magenta set shape "circle" ]
+    ]
 
   ]
 
@@ -114,7 +119,7 @@ to go
   if ticks = end-simulation or parar [
     if video [
         ;print "Guardo video!!!!!!!!!!!!"
-        let fname (word "DynamicFire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".mp4")
+        let fname (word "DynamicFire_" initial-deforested-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".mp4")
         vid:save-recording fname
     ]
     ;export-fire-interval
@@ -215,7 +220,7 @@ to count-fires-export
   if ticks > 7200 and mes = 0 [
     if save-view [
     ;print (word "Modulo Ticks : " mes " - " ticks)
-      let fname (word "Data/Fire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
+      let fname (word "Data/Fire_" initial-deforested-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
       csv:to-file fname   [ (list pycor pxcor pcolor) ] of patches
     ]
   ]
@@ -314,7 +319,7 @@ end
 to export-fire-interval
 
     ;print (word "Modulo Ticks : " mes " - " ticks)
-  let fname (word "Data/FireInterval_" nlrx-experiment "_" initial-forest-density  "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
+  let fname (word "Data/FireInterval_" nlrx-experiment "_" initial-deforested-density  "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
   csv:to-file fname   [ (list pycor pxcor fire-interval) ] of patches
 
 end
@@ -483,16 +488,16 @@ percent-burned
 SLIDER
 12
 10
-218
+259
 43
-Initial-forest-density
-Initial-forest-density
+Initial-deforested-density
+Initial-deforested-density
 0.0
 1
-0.0
-0.1
+0.09
+0.001
 1
-%
+NIL
 HORIZONTAL
 
 BUTTON
@@ -566,7 +571,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-4.1352891901468145E-6
+4.346783034618471E-7
 .0000001
 1
 NIL
@@ -641,7 +646,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 100
-1.02
+1.1
 0.01
 1
 NIL
@@ -839,7 +844,7 @@ deforestation-prob
 deforestation-prob
 0
 .0001
-2.0E-5
+2.0E-7
 0.00001
 1
 NIL
