@@ -238,6 +238,13 @@ to-report active-burned
   report (count patches with [pcolor = red]) / total-forest
 end
 
+to-report median-fire-interval
+   report median [ fire-interval ] of patches with [ last-fire-time > (ticks - 7300 ) and number-of-fires > 2]
+end
+
+to-report percent-deforested
+  report (count patches with [deforested]) / total-forest
+end
 
 to read-fire-prob
   ifelse file-exists? fire-prob-filename [
@@ -494,7 +501,7 @@ Initial-deforested-density
 Initial-deforested-density
 0.0
 1
-0.09
+0.009
 0.001
 1
 NIL
@@ -646,7 +653,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 100
-1.1
+1.01
 0.01
 1
 NIL
@@ -713,7 +720,7 @@ MONITOR
 937
 465
 median fire interval
-median [ fire-interval ] of patches with [ last-fire-time > (ticks - 3650 ) and number-of-fires > 2]
+median-fire-interval
 4
 1
 11
@@ -844,8 +851,8 @@ deforestation-prob
 deforestation-prob
 0
 .0001
-2.0E-7
-0.00001
+1.05E-7
+0.000001
 1
 NIL
 HORIZONTAL
@@ -871,7 +878,7 @@ MONITOR
 925
 520
 Percent Deforested
-count patches with [deforested] / total-forest * 100
+percent-deforested * 100
 2
 1
 11
