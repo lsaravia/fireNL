@@ -6,6 +6,7 @@ globals [
   fire-patches    ;; number of patches that catch fire
   powexp          ;; power law dispersla of forest
   forest-growth-prob
+  forest-recovery-after-fire-prob
   total-forest
   f-prob
   start-fire-season
@@ -87,6 +88,8 @@ to setup
   ][
     set forest-growth-prob 1 / forest-growth
   ]
+  set forest-recovery-after-fire-prob 1 / forest-recovery-after-fire
+
   set start-fire-season int ( ( 365 / 2 ) - ( days-fire-season / 2 ) )
   set end-fire-season   int ( start-fire-season + days-fire-season - 1 )
 
@@ -418,55 +421,90 @@ end
 
 
 
-
+;
+; Deforest adjacent to other deforested patch with deforest-after-fire-prop proportion on a patch after fire and (1 - deforest-after-fire-prop proportion) on any patch
+;
 to deforestation
   let deforest-forest random-poisson ( total-forest * deforestation-prob )
-  ;print word "Deforestation number: " deforest-forest
-  ;
-  ; deforest after fires
-  ;
-  let  def-after-fire-num precision ( deforest-forest * deforest-after-fire-prop ) 0
-  ;print word "Deforestation after fire: " def-after-fire-num
-  let patches-1year-fire patches with [ not deforested and  ( ticks - last-fire-time ) > 365 ]
-  if any? patches-1year-fire [
-    ask n-of def-after-fire-num patches-1year-fire [
-      set deforested true
-      sprout 1 [set color magenta set shape "circle" ]
+  if deforest-forest > 0 [
+    ;print word "Deforestation number: " deforest-forest
+
+    ifelse random-float 1 < deforest-after-fire-prop [
+      ;
+      ; deforest after fires
+      ;
+      ;let  def-after-fire-num precision ( deforest-forest * deforest-after-fire-prop ) 0
+      ;print word "Deforestation after fire number: " def-after-fire-num
+      let patches-1year-fire patches with [ not deforested and  ( member? true [deforested] of neighbors ) and (number-of-fires > 0 ) and ( ticks - last-fire-time ) > 365 ]
+      ifelse any? patches-1year-fire [
+        ask n-of deforest-forest patches-1year-fire [
+          set deforested true
+          sprout 1 [set color magenta set shape "circle" ]
+          ;show "Deforestation after fire"
+        ]
+      ][
+        deforest-independent-of-fire deforest-forest
+      ]
+    ][
+      ;
+      ; Deforest independen of fire
+      ;
+      ;let def-num precision ( deforest-forest * ( 1 - deforest-after-fire-prop ) ) 0
+      ;print word "Deforestation independent fire: " def-num
+      deforest-independent-of-fire deforest-forest
+
     ]
   ]
+
   ;
-  ; Deforest independen of fire
-  ;
-  let def-num precision ( deforest-forest * ( 1 - deforest-after-fire-prop ) ) 0
-  ;print word "Deforestation independent fire: " def-num
-  ask n-of def-num patches with [not deforested] [
-    set deforested true
-    set pcolor green
-    sprout 1 [set color magenta set shape "circle" ]
-  ]
-  ;
-  ; If deforested patches are burned turn it green after a year
+  ; If deforested patches are burned turn it green after a year of a fire so they can catch fire again
+  ; If non deforested turn it green, but after 2 fires assume they recover
   ;
   ;set patches-1year-fire patches with [ deforested and ( pcolor != green ) and  ( ticks - last-fire-time ) > 365 ]
 
-  set patches-1year-fire patches with [ ( pcolor != green ) and  ( ticks - last-fire-time ) > 365  and number-of-fires > 0]
+  let patches-1year-fire patches with [ ( pcolor != green ) and  ( ticks - last-fire-time ) > 365  and number-of-fires > 0 ]
   if any? patches-1year-fire [
     ask patches-1year-fire [
-      ;show "Deforestado Me volvi verde"
-      set pcolor green
+      ifelse deforested [
+        ;show "Deforestado Me volvi verde"
+        set pcolor green
+      ][
+        if random-float 1 < forest-recovery-after-fire-prob [
+          set pcolor green
+          ;show Word "No Deforestado verde after: " (ticks - last-fire-time)
+        ]
+      ]
     ]
   ]
 
+end
+
+;
+; Deforest independen of fire with a deforested neighbor
+;
+to deforest-independent-of-fire [num-deforest]
+  ;let def-num precision ( deforest-forest * ( 1 - deforest-after-fire-prop ) ) 0
+  ;print word "Deforestation independent fire: " def-num
+  let patches-1year-fire patches with [ not deforested and  ( member? true [deforested] of neighbors )]
+
+  if any? patches-1year-fire [
+    ask n-of num-deforest patches-1year-fire [
+      set deforested true
+      set pcolor green
+      sprout 1 [set color magenta set shape "circle" ]
+      ;show "Deforestation without fire"
+    ]
+  ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
 275
 10
-793
-529
+778
+514
 -1
 -1
-3.4
+1.1
 1
 10
 1
@@ -477,9 +515,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-149
+449
 0
-149
+449
 1
 1
 1
@@ -583,7 +621,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-6.376698828291156E-7
+4.346783034618471E-7
 .0000001
 1
 NIL
@@ -871,7 +909,7 @@ deforest-after-fire-prop
 deforest-after-fire-prop
 0
 1
-0.4
+0.38
 .01
 1
 NIL
@@ -887,6 +925,21 @@ percent-deforested * 100
 2
 1
 11
+
+SLIDER
+555
+735
+787
+768
+forest-recovery-after-fire
+forest-recovery-after-fire
+0
+7300
+365.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
