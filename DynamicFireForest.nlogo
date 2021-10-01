@@ -223,6 +223,16 @@ to-report active-burned
   report (count patches with [pcolor = red]) / total-forest
 end
 
+; Calculate the median return time interval, after the first fire to discard transients and using the last 20 years of simulation
+;
+to-report median-fire-interval
+  let p-with-fire patches with [ last-fire-time > (ticks - 7300 ) and number-of-fires > 2]
+  ifelse any? p-with-fire [
+     report median [ fire-interval ] of p-with-fire
+  ][
+    report 0
+  ]
+end
 
 to read-fire-prob
   ifelse file-exists? fire-prob-filename [
@@ -513,7 +523,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-6.376698828291156E-7
+2.0E-7
 .0000001
 1
 NIL
@@ -573,7 +583,7 @@ Forest-growth
 Forest-growth
 0
 6000
-1760.0
+2000.0
 10
 1
 NIL
@@ -652,10 +662,10 @@ PENS
 MONITOR
 800
 420
-927
+937
 465
-mean fire interval
-median [ fire-interval ] of patches with [ last-fire-time > (ticks - 3650 ) and number-of-fires > 2]
+median fire interval
+median-fire-interval
 4
 1
 11
@@ -681,7 +691,7 @@ INPUTBOX
 257
 670
 fire-prob-filename
-Data/Estimated_bF.csv
+Data/Estimated_bF.ppp
 1
 0
 String
