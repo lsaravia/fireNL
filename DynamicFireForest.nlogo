@@ -446,7 +446,7 @@ Initial-forest-density
 Initial-forest-density
 0.0
 1
-0.6
+0.3
 0.1
 1
 %
@@ -523,7 +523,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-2.0E-7
+2.0E-6
 .0000001
 1
 NIL
@@ -545,7 +545,7 @@ true
 true
 "" ""
 PENS
-"Burned" 1.0 0 -12251123 true "" "plot burned-by-month * 100\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks                                       \n]\nif ticks mod 1095 = 0 \n[\n  set-plot-y-range 0  0.5                                        \n]"
+"Burned" 1.0 0 -12251123 true "" "plot burned-by-month * 100\nif ticks > 7300 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 7300) ticks                                       \n]\nif ticks mod 1095 = 0 \n[\n  set-plot-y-range 0  0.5                                        \n]"
 "Active (x100)" 1.0 0 -2674135 true "" "plot active-burned * 100"
 
 SLIDER
@@ -756,7 +756,7 @@ true
 false
 "set-plot-x-range 0 10000\nset-histogram-num-bars 20" ""
 PENS
-"default" 1.0 1 -16777216 true "" "histogram [fire-interval] of patches with [ number-of-fires > 2 and last-fire-time > (ticks - 3650 )]"
+"default" 1.0 1 -16777216 true "" "histogram [fire-interval] of patches with [ number-of-fires > 2 and last-fire-time > (ticks - 7300 )]"
 
 PLOT
 1240
@@ -774,7 +774,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -13840069 true "" "plot percent-forest\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks \n]\n\nif ticks mod 360 = 0 \n[\n  set-plot-y-range 0  precision ( percent-forest * 2)  2                                      \n]"
+"default" 1.0 0 -13840069 true "" "plot percent-forest\nif ticks > 7300 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 7300) ticks \n]\n\nif ticks mod 360 = 0 \n[\n  set-plot-y-range 0  precision ( percent-forest * 2)  2                                      \n]"
 
 MONITOR
 480
@@ -786,6 +786,24 @@ powexp
 4
 1
 11
+
+PLOT
+1070
+595
+1465
+745
+Median Fire Interval
+NIL
+NIL
+0.0
+10.0
+0.0
+10.0
+true
+false
+"" ""
+PENS
+"default" 1.0 0 -16777216 true "" "plot median-fire-interval\nif ticks > 7300 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 7300) ticks \n]\n"
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
