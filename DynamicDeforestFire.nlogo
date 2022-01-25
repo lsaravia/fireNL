@@ -4,8 +4,10 @@ globals [
   ;initial-trees   ;; how many trees (green patches) we started with
   parar
   fire-patches    ;; number of patches that catch fire
-  powexp          ;; power law dispersla of forest
+  powexp          ;; power law dispersal exponent of forest
+  powexp-fire     ;; power law dispersal exponent of fire into forest
   forest-growth-prob
+  forest-recovery-after-fire-prob
   total-forest
   f-prob
   start-fire-season
@@ -27,6 +29,8 @@ patches-own [
   fire-interval     ; the time interval between the last two fires
   number-of-fires   ; the number of times the patch was burned
   cluster-label             ; find clusters (patches)
+  deforested        ; false = Not deforested, true deforested
+  deforested-time   ;
 ]
 
 
@@ -44,6 +48,7 @@ to setup
   ;  resize-world 0 249 0 249
   ;  set-patch-size 2
   ;]
+  set col-burned red - 3.5
   set total-forest world-width * world-height
   set fire-prob-list []                               ;  fire prob readed from file
   set fire-prob-list-se []                            ;  SE of fire prob readed from file
@@ -56,13 +61,20 @@ to setup
   set accum-mes 0
 
   ask patches [
-    if (random-float 1) < initial-forest-density [
-      set pcolor green
-    ]
     set fire-interval  0     ; the time interval between the last two fires
     set last-fire-time 1     ; time of the last time the patch was burned
     set number-of-fires 0    ; the number of times the patch was burned
+    set deforested false
+    set deforested-time 1    ; the time of deforestation
+    set pcolor green         ; All the patches are forest initially
+    ;
+    if (random-float 1) < initial-deforested-density [
+      ;show " Initial deforestation "
 
+      set deforested true
+      set pcolor black
+      ;sprout 1 [set color magenta set shape "circle" ]
+    ]
 
   ]
 
@@ -70,12 +82,17 @@ to setup
   ;; calculate power law exponent from dispersal distance, deriving the power exponent of a distribution with mean = birds-dispersal-distance
   ;;
   set powexp (1 - 2 * forest-dispersal-distance ) / (1 - forest-dispersal-distance )
+  set powexp-fire (1 - 2 * fire-dispersal-distance ) / (1 - fire-dispersal-distance )
 
   ;;
   ;; Calculate forest growth probability
   ;;
-  set forest-growth-prob 1 / forest-growth
+  ifelse forest-growth = 0 [
+    set forest-growth-prob 0
 
+  ][
+    set forest-growth-prob 1 / forest-growth
+  ]
   set start-fire-season int ( ( 365 / 2 ) - ( days-fire-season / 2 ) )
   set end-fire-season   int ( start-fire-season + days-fire-season - 1 )
 
@@ -87,9 +104,6 @@ to setup
 
   set-fire-prob-by-month
   set eval-burned-clusters-list read-from-string eval-burned-clusters
-
-  ; color of burned patches
-  set col-burned red - 3.5
 
   set f-prob  world-width * world-height * fire-probability
   set parar false
@@ -110,7 +124,7 @@ to go
   if ticks = end-simulation or parar [
     if video [
         ;print "Guardo video!!!!!!!!!!!!"
-        let fname (word "DynamicFire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".mp4")
+        let fname (word "DynamicFire_" initial-deforested-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".mp4")
         vid:save-recording fname
     ]
     ;export-fire-interval
@@ -144,21 +158,45 @@ to go
     set f-prob  world-width * world-height * fire-probability
   ]
 
+  ;; Deforest forest
+  ;;
+  deforestation
+
+  ;; Deforested patches burn
+  ;;
   ;print word "f-prob " f-prob
   ;print word "fire-probability " fire-probability
   set fire-patches random-poisson f-prob
-  ask n-of fire-patches patches [
+  ask n-of fire-patches patches with [deforested] [
       burn-patch
   ]
 
-  ;; Fire spread
+  ;; Fire spread only in deforested patches after 1 year
   ;;
-  ask patches with [ pcolor = red ] [ ;; ask the burning trees
-    ask neighbors4 with [pcolor = green] [ ;; ask their non-burning neighbor trees
+  ask patches with [ pcolor = red ] [                     ;; ask the burning trees
+    ask neighbors4 with [deforested-time > 365 and (ticks - last-fire-time) > 365 ] [        ;; ask deforested forest after 1 year to burn
       burn-patch
     ]
-    set pcolor col-burned ;; once the tree is burned, darken its color
+    ;;
+    ;;
+    let effective-dispersal  random-power-law-distance 1 powexp-fire
+
+    ;; ask non deforested forest to burn with some probability  ADD HERE the power-law kernel to simulate probability of fire to a distance of actual fires.
+    ;;
+    ;; print (word "fire effective dispersal: " effective-dispersal)
+    let non-deforested-neighbors max-one-of patches with [not deforested and (ticks - last-fire-time) > 365 ] in-radius effective-dispersal [distance self]
+    ;;print (word "Dispersal set: " non-deforested-neighbors )
+    if non-deforested-neighbors != nobody [
+      ask non-deforested-neighbors [
+        if random-float 1 < probability-of-spread [
+          burn-patch
+        ]
+      ]
+    ]
+
+    set pcolor col-burned                                 ;; once the tree is burned, darken its color
   ]
+
   tick
   count-fires-export
 ;; advance the clock by one “tick”
@@ -167,7 +205,7 @@ end
 
 
 to burn-patch
-
+  ;print "Burn-patch"
   set pcolor red                                ;; to catch on fire
   set fire-interval  ticks - last-fire-time     ;; the time interval between the last two fires
   set last-fire-time ticks                      ;; time of the last time the patch was burned
@@ -175,15 +213,20 @@ to burn-patch
 
 end
 
+;; Deforested forest can recover after 3 years (1095 days)
+;;
 
 to grow-forest
   if random-float 1 < forest-growth-prob
   [
+    ;print "growth forest"
     let effective-dispersal  random-power-law-distance 1 powexp
 
     ask max-one-of patches in-radius effective-dispersal [distance self][
       ;;show (word "in-radius eff-disp " effective-dispersal " - Real distance " distance centerpatch)
-      if pcolor != red [
+      if (pcolor = black or pcolor = col-burned) and ( deforested-time > 1095 or not deforested) [
+         show "growth forest"
+         set deforested false
          set pcolor green
       ]
     ]
@@ -205,13 +248,13 @@ to count-fires-export
     vid:record-view
   ]
 
-  if ticks > 7200 and mes = 0 [
-    if save-view [
-    ;print (word "Modulo Ticks : " mes " - " ticks)
-      let fname (word "Data/Fire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
-      csv:to-file fname   [ (list pycor pxcor pcolor) ] of patches
-    ]
-  ]
+  ;if ticks > 7200 and mes = 0 [
+  ;  if save-view [
+  ;  ;print (word "Modulo Ticks : " mes " - " ticks)
+  ;    let fname (word "Data/Fire_" initial-deforested-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
+  ;    csv:to-file fname   [ (list pycor pxcor pcolor) ] of patches
+  ;  ]
+  ;]
 end
 
 to-report percent-burned
@@ -226,8 +269,6 @@ to-report active-burned
   report (count patches with [pcolor = red]) / total-forest
 end
 
-; Calculate the median return time interval, after the first fire to discard transients and using the last 20 years of simulation
-;
 to-report median-fire-interval
   let p-with-fire patches with [ last-fire-time > (ticks - 7300 ) and number-of-fires > 2]
   ifelse any? p-with-fire [
@@ -235,6 +276,10 @@ to-report median-fire-interval
   ][
     report 0
   ]
+end
+
+to-report percent-deforested
+  report (count patches with [deforested]) / total-forest
 end
 
 to read-fire-prob
@@ -317,7 +362,7 @@ end
 to export-fire-interval
 
     ;print (word "Modulo Ticks : " mes " - " ticks)
-  let fname (word "Data/FireInterval_" nlrx-experiment "_" initial-forest-density  "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
+  let fname (word "Data/FireInterval_" nlrx-experiment "_" initial-deforested-density  "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
   csv:to-file fname   [ (list pycor pxcor fire-interval) ] of patches
 
 end
@@ -401,15 +446,43 @@ to-report burned-clusters [days]
   report cluster-sizes
 
 end
+
+
+
+;
+; Deforest adjacent to other deforested patch
+;
+to deforestation
+  let deforest-forest random-poisson ( total-forest * deforestation-prob )
+  if deforest-forest > 0 [
+
+    ;print word "Deforestation number: " deforest-forest
+    ask n-of deforest-forest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
+      ask one-of neighbors4 with [not deforested ] [               ;; ask non deforested forest to burn with some probability
+        ;show self
+        set deforested true
+        set deforested-time ticks   ;
+        set pcolor black
+
+      ]
+    ]
+  ]
+
+
+  ;; Forest recovery is forest growth from non deforested patches!!!!!!!!!!!!!
+  ;; Change deforested variable to a pcolor to optimize model
+
+end
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 275
 10
-778
-514
+748
+484
 -1
 -1
-1.1
+3.1
 1
 10
 1
@@ -420,9 +493,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-449
+149
 0
-449
+149
 1
 1
 1
@@ -435,7 +508,7 @@ MONITOR
 912
 350
 percent burned
-percent-burned
+percent-burned * 100
 4
 1
 11
@@ -443,16 +516,16 @@ percent-burned
 SLIDER
 12
 10
-218
+259
 43
-Initial-forest-density
-Initial-forest-density
+Initial-deforested-density
+Initial-deforested-density
 0.0
 1
-0.3
-0.1
+0.009
+0.001
 1
-%
+NIL
 HORIZONTAL
 
 BUTTON
@@ -526,7 +599,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-2.0E-6
+4.346783034618471E-7
 .0000001
 1
 NIL
@@ -548,7 +621,7 @@ true
 true
 "" ""
 PENS
-"Burned" 1.0 0 -12251123 true "" "plot burned-by-month * 100\nif ticks > 7300 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 7300) ticks                                       \n]\nif ticks mod 1095 = 0 \n[\n  set-plot-y-range 0  0.5                                        \n]"
+"Burned" 1.0 0 -12251123 true "" "plot burned-by-month * 100\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks                                       \n]\nif ticks mod 1095 = 0 \n[\n  set-plot-y-range 0  0.5                                        \n]"
 "Active (x100)" 1.0 0 -2674135 true "" "plot active-burned * 100"
 
 SLIDER
@@ -586,7 +659,7 @@ Forest-growth
 Forest-growth
 0
 6000
-2000.0
+1720.0
 10
 1
 NIL
@@ -601,7 +674,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 100
-1.01
+1.1
 0.01
 1
 NIL
@@ -612,7 +685,7 @@ MONITOR
 360
 915
 405
-Percent forest
+Percent Forest
 Percent-forest
 4
 1
@@ -694,7 +767,7 @@ INPUTBOX
 257
 670
 fire-prob-filename
-Data/Estimated_bF.ppp
+Data/Estimated_bF.csv
 1
 0
 String
@@ -759,14 +832,14 @@ true
 false
 "set-plot-x-range 0 10000\nset-histogram-num-bars 20" ""
 PENS
-"default" 1.0 1 -16777216 true "" "histogram [fire-interval] of patches with [ number-of-fires > 2 and last-fire-time > (ticks - 7300 )]"
+"default" 1.0 1 -16777216 true "" "histogram [fire-interval] of patches with [ number-of-fires > 2 and last-fire-time > (ticks - 3650 )]"
 
 PLOT
 1240
 310
 1590
 570
-Forest %
+Fuel %
 NIL
 NIL
 0.0
@@ -777,7 +850,7 @@ true
 false
 "" ""
 PENS
-"default" 1.0 0 -13840069 true "" "plot percent-forest\nif ticks > 7300 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 7300) ticks \n]\n\nif ticks mod 360 = 0 \n[\n  set-plot-y-range 0  precision ( percent-forest * 2)  2                                      \n]"
+"default" 1.0 0 -13840069 true "" "plot percent-forest\nif ticks > 3600 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 3600) ticks \n]\n\nif ticks mod 360 = 0 \n[\n  set-plot-y-range 0  precision ( percent-forest * 2)  2                                      \n]"
 
 MONITOR
 480
@@ -790,30 +863,87 @@ powexp
 1
 11
 
-PLOT
-1070
-595
-1465
-745
-Median Fire Interval
+SLIDER
+550
+685
+742
+718
+deforestation-prob
+deforestation-prob
+0
+.0001
+1.0E-5
+0.000001
+1
+NIL
+HORIZONTAL
+
+SLIDER
+765
+685
+987
+718
+probability-of-spread
+probability-of-spread
+0
+1
+0.1
+.01
+1
+NIL
+HORIZONTAL
+
+MONITOR
+800
+475
+925
+520
+Percent Deforested
+percent-deforested * 100
+2
+1
+11
+
+SLIDER
+1025
+685
+1242
+718
+fire-dispersal-distance
+fire-dispersal-distance
+1.01
+100
+11.27
+0.01
+1
+NIL
+HORIZONTAL
+
+BUTTON
+545
+740
+687
+773
+SetupOnePatch
+ask patches [ set deforested false set pcolor green]\nask patch 75 75 [ set deforested true set pcolor black ]
+NIL
+1
+T
+OBSERVER
 NIL
 NIL
-0.0
-10.0
-0.0
-10.0
-true
-false
-"" ""
-PENS
-"default" 1.0 0 -16777216 true "" "plot median-fire-interval\nif ticks > 7300 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 7300) ticks \n]\n"
+NIL
+NIL
+1
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
 
 ## WHAT IS IT?
 
-This model simulates the spread of a fire through a forest.  It shows that the fire's chance of reaching the right edge of the forest depends critically on the density of trees. This is an example of a common feature of complex systems, the presence of a non-linear threshold or critical parameter.
+This model simulates the spread of a fire through a forest that suffers deforestation.  
+It has some realistic features like the simulation of a fire-season or the reading of a file with ignition probabilities. The green pixels are are the ones with enough fuel to be burned, the magenta ones are deforested, the brown are burned without fuel, and the red are the actual burning ones. 
+
 
 ## HOW IT WORKS
 
