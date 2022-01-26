@@ -174,7 +174,7 @@ to go
   ;; Fire spread only in deforested patches after 1 year
   ;;
   ask patches with [ pcolor = red ] [                     ;; ask the burning trees
-    ask neighbors4 with [deforested-time > 365 and (ticks - last-fire-time) > 365 ] [        ;; ask deforested forest after 1 year to burn
+    ask neighbors4 with [deforested and (ticks - deforested-time > 365) and (ticks - last-fire-time) > 365 ] [        ;; ask deforested forest after 1 year to burn
       burn-patch
     ]
     ;;
@@ -223,9 +223,10 @@ to grow-forest
     let effective-dispersal  random-power-law-distance 1 powexp
 
     ask max-one-of patches in-radius effective-dispersal [distance self][
-      ;;show (word "in-radius eff-disp " effective-dispersal " - Real distance " distance centerpatch)
-      if (pcolor = black or pcolor = col-burned) and ( deforested-time > 1095 or not deforested) [
-         show "growth forest"
+      ;show "max-one"
+      ;;show (word "in-radius eff-disp " effective-dispersal " - Real distance " distance myself)
+      if (pcolor = black or pcolor = col-burned) and ( ticks - deforested-time > 1095 or not deforested) and ( ticks - last-fire-time > 1095) [
+         ;;show "growth forest"
          set deforested false
          set pcolor green
       ]
@@ -458,8 +459,9 @@ to deforestation
 
     ;print word "Deforestation number: " deforest-forest
     ask n-of deforest-forest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
+      ;;show "n-of"
       ask one-of neighbors4 with [not deforested ] [               ;; ask non deforested forest to burn with some probability
-        ;show self
+        ;;show "one-of"
         set deforested true
         set deforested-time ticks   ;
         set pcolor black
@@ -478,11 +480,11 @@ end
 GRAPHICS-WINDOW
 275
 10
-748
-484
+778
+514
 -1
 -1
-3.1
+1.1
 1
 10
 1
@@ -493,9 +495,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-149
+449
 0
-149
+449
 1
 1
 1
@@ -599,7 +601,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-4.346783034618471E-7
+4.389294360140412E-7
 .0000001
 1
 NIL
@@ -674,7 +676,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 100
-1.1
+1.2
 0.01
 1
 NIL
@@ -839,7 +841,7 @@ PLOT
 310
 1590
 570
-Fuel %
+Percent Forest %
 NIL
 NIL
 0.0
@@ -926,6 +928,23 @@ BUTTON
 773
 SetupOnePatch
 ask patches [ set deforested false set pcolor green]\nask patch 75 75 [ set deforested true set pcolor black ]
+NIL
+1
+T
+OBSERVER
+NIL
+NIL
+NIL
+NIL
+1
+
+BUTTON
+545
+780
+692
+813
+SetupOneForest
+ask patches [ set deforested true set pcolor black]\nask patch 75 75 [ set deforested false set pcolor green ]
 NIL
 1
 T
