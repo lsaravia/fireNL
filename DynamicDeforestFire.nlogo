@@ -549,8 +549,8 @@ to deforestation-roads [ prob ]
             stop
           ]
           [
-            if random-float 1 < 0.1 [
-              fd random-poisson 4
+            if random-float 1 < 0.3 [
+              fd random-poisson  ceiling ( max-pxcor / 50 )
             ]
           ]
 
@@ -694,7 +694,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-6.376698828291156E-7
+6.929346060076389E-7
 .0000001
 1
 NIL
