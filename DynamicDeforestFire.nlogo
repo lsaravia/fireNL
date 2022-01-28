@@ -68,15 +68,8 @@ to setup
     set deforested-time 1    ; the time of deforestation
     set pcolor green         ; All the patches are forest initially
     ;
-    if (random-float 1) < initial-deforested-density [
-      ;show " Initial deforestation "
-
-      set deforested true
-      set pcolor black
-      ;sprout 1 [set color magenta set shape "circle" ]
-    ]
-
   ]
+
 
   ;;
   ;; calculate power law exponent from dispersal distance, deriving the power exponent of a distribution with mean = birds-dispersal-distance
@@ -107,6 +100,25 @@ to setup
 
   set f-prob  world-width * world-height * fire-probability
   set parar false
+
+  ;; initial-deforestion
+  ;;
+  ifelse initial-highway-deforestation [
+    deforestation-roads initial-deforested-density
+  ][                                   ;; Initial Random deforestation
+    ask patches [
+
+      if (random-float 1) < initial-deforested-density [
+        ;show " Initial deforestation "
+
+        set deforested true
+        set pcolor black
+      ]
+    ]
+  ]
+
+
+
   ;print video
   if video [
           vid:reset-recorder
@@ -160,7 +172,7 @@ to go
 
   ;; Deforest forest
   ;;
-  deforestation
+  deforestation deforestation-prob
 
   ;; Deforested patches burn
   ;;
@@ -453,29 +465,110 @@ end
 ;
 ; Deforest adjacent to other deforested patch
 ;
-to deforestation
-  let deforest-forest random-poisson ( total-forest * deforestation-prob )
-  if deforest-forest > 0 [
-
+to deforestation [ prob ]
+  let deforest-forest random-poisson ( total-forest * prob )
+  let count-deforest 0
+  while [count-deforest < deforest-forest ][
     ;print word "Deforestation number: " deforest-forest
-    ask n-of deforest-forest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
-      ;;show "n-of"
-      ask one-of neighbors4 with [not deforested ] [               ;; ask non deforested forest to burn with some probability
-        ;;show "one-of"
-        set deforested true
-        set deforested-time ticks   ;
-        set pcolor black
-
+    ask up-to-n-of deforest-forest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
+      ;;show "Before deforest"
+      let one-not-deforested one-of neighbors4 with [not deforested ]
+      if one-not-deforested != nobody [
+        ask one-not-deforested [                                  ;; defores a not deforested neighbor
+          ;;show "Deforest"
+          set deforested true
+          set deforested-time ticks   ;
+          set pcolor black
+        ]
       ]
     ]
+    set count-deforest count patches with [deforested]
+
   ]
-
-
-  ;; Forest recovery is forest growth from non deforested patches!!!!!!!!!!!!!
-  ;; Change deforested variable to a pcolor to optimize model
-
 end
 
+;
+; Deforest adjacent to other deforested patch
+;
+to deforestation-roads [ prob ]
+  let deforest-forest  total-forest * prob
+
+  ;;print word "deforest-forest: " deforest-forest
+
+  if deforest-forest > 0 [
+    ;; Build ROADS using turtles
+    ;;
+    let deforest-forest-turtles 3 ;;deforest-forest / 1000
+    let count-deforest 0
+
+    set count-deforest count patches with [deforested]
+    while [count-deforest <= (0.1 * deforest-forest)] [
+      crt 1 [
+        set color white
+        set size 4
+        let side random 4
+        (ifelse side = 0 [ set xcor min-pxcor set ycor random-pycor set heading 90 lt random 90 rt random 90]
+          side = 1 [ set ycor min-pycor set xcor random-pxcor set heading 0 lt random 90 rt random 90]
+          side = 2 [ set xcor max-pxcor set ycor random-pycor set heading 270 lt random 90 rt random 90]
+          side = 3 [ set ycor max-pycor set xcor random-pxcor set heading 180 lt random 90 rt random 45]
+        )
+        if abs [pxcor] of patch-ahead 0.1 = max-pxcor [ lt random 90  ]
+        if abs [pycor] of patch-ahead 0.1 = max-pycor [ lt random 90  ]
+        if abs [pxcor] of patch-ahead 0.1 = min-pxcor [ rt random 90  ]
+        if abs [pxcor] of patch-ahead 0.1 = min-pycor [ rt random 90  ]
+
+        ;;show (word "xcor: " xcor " ycor: "ycor " heading: " heading)
+      ]
+      display
+      ;;print (word "Before deforestf: " deforest-forest " count-deforest: " count-deforest)
+      ;;print word  "Total turtles before: " count turtles
+      ask one-of turtles [
+        ;;show "Turtle to deforest"
+        let steps 0
+        let border false
+        while [not border] [
+          fd 1
+          ;;show "After fd"
+          set steps steps + 1
+          set deforested true
+          set deforested-time ticks   ;
+          set pcolor black
+          ;;if ( abs pxcor = max-pxcor) or ( abs [pxcor] of patch-ahead 0.1 = max-pxcor) [ set border true  ]
+          ;;if ( abs pycor = max-pycor) or ( abs [pycor] of patch-ahead 0.1 = max-pycor) [ set border true  ]
+          ;;if ( abs pxcor = min-pxcor) or ( abs [pxcor] of patch-ahead 0.1 = min-pxcor) [ set border true  ]
+          ;;if ( abs pycor = min-pycor) or ( abs [pycor] of patch-ahead 0.1 = min-pycor) [ set border true  ]
+          if ( abs pxcor = max-pxcor) [ set border true  ]
+          if ( abs pycor = max-pycor) [ set border true  ]
+          if ( abs pxcor = min-pxcor) [ set border true  ]
+          if ( abs pycor = min-pycor) [ set border true  ]
+
+          ;;print (word "step: " steps " border: " border)
+          ifelse steps > sqrt ( 2 * ( max-pxcor ^ 2 ) ) [
+            ;;show "before die"
+            die
+            stop
+          ]
+          [
+            if random-float 1 < 0.1 [
+              fd random-poisson 4
+            ]
+          ]
+
+        ]
+        set count-deforest count patches with [deforested]
+        ;;show (word "count-deforest and DIE: " count-deforest)
+        display
+        die
+      ]
+    ]
+    ask turtles [ die ]
+    if count-deforest < deforest-forest [
+       let further-deforest prob - ( count-deforest  / total-forest )
+       ;;print (word "further-deforest: " further-deforest " initial-deforest: " prob)
+       deforestation further-deforest
+    ]
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 275
@@ -516,15 +609,15 @@ percent-burned * 100
 11
 
 SLIDER
-12
 10
-259
+10
+257
 43
 Initial-deforested-density
 Initial-deforested-density
 0.0
 1
-0.009
+0.05
 0.001
 1
 NIL
@@ -532,9 +625,9 @@ HORIZONTAL
 
 BUTTON
 90
-51
+135
 159
-87
+171
 go
 go
 T
@@ -549,9 +642,9 @@ NIL
 
 BUTTON
 12
-51
+135
 82
-87
+171
 setup
 setup
 NIL
@@ -577,9 +670,9 @@ video
 
 BUTTON
 11
-94
+178
 118
-127
+211
 Stop Video
 set parar true
 NIL
@@ -594,14 +687,14 @@ NIL
 
 SLIDER
 10
-195
+225
 240
-228
+258
 Fire-probability
 Fire-probability
 0
 .00001
-4.389294360140412E-7
+6.376698828291156E-7
 .0000001
 1
 NIL
@@ -627,10 +720,10 @@ PENS
 "Active (x100)" 1.0 0 -2674135 true "" "plot active-burned * 100"
 
 SLIDER
-11
-149
-183
+10
+50
 182
+83
 end-simulation
 end-simulation
 7200
@@ -654,9 +747,9 @@ Save-view
 
 SLIDER
 10
-295
+310
 182
-328
+343
 Forest-growth
 Forest-growth
 0
@@ -669,9 +762,9 @@ HORIZONTAL
 
 SLIDER
 10
-250
+270
 242
-283
+303
 forest-dispersal-distance
 forest-dispersal-distance
 1.01
@@ -954,6 +1047,17 @@ NIL
 NIL
 NIL
 1
+
+SWITCH
+10
+90
+267
+123
+initial-highway-deforestation
+initial-highway-deforestation
+0
+1
+-1000
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
