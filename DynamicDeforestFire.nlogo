@@ -100,7 +100,6 @@ to setup
 
   set f-prob  world-width * world-height * fire-probability
   set parar false
-
   ;; initial-deforestion
   ;;
   ifelse initial-highway-deforestation [
@@ -468,11 +467,15 @@ end
 to deforestation [ prob ]
   let deforest-forest random-poisson ( total-forest * prob )
   let count-deforest 0
+
   while [count-deforest < deforest-forest ][
     ;print word "Deforestation number: " deforest-forest
     ask up-to-n-of deforest-forest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
       ;;show "Before deforest"
-      let one-not-deforested one-of neighbors4 with [not deforested ]
+      let ext-neig random-poisson  ceiling ( max-pxcor / 50 )     ;; Extended von neumann neighborhood radius
+      let ext-von-neumann von-neumann-offsets ext-neig false      ;; Extendend von neumann neighborhood list of patches
+
+      let one-not-deforested one-of  patches at-points ext-von-neumann with [not deforested ]
       if one-not-deforested != nobody [
         ask one-not-deforested [                                  ;; defores a not deforested neighbor
           ;;show "Deforest"
@@ -568,6 +571,14 @@ to deforestation-roads [ prob ]
        deforestation further-deforest
     ]
   ]
+end
+
+
+to-report von-neumann-offsets [n include-center?]
+  let result [list pxcor pycor] of patches with [abs pxcor + abs pycor <= n]
+  ifelse include-center?
+    [ report result ]
+    [ report remove [0 0] result ]
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
@@ -694,7 +705,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-6.929346060076389E-7
+6.37351047887701E-6
 .0000001
 1
 NIL
@@ -982,7 +993,7 @@ probability-of-spread
 probability-of-spread
 0
 1
-0.1
+0.5
 .01
 1
 NIL
@@ -1008,7 +1019,7 @@ fire-dispersal-distance
 fire-dispersal-distance
 1.01
 100
-11.27
+11.0
 0.01
 1
 NIL
