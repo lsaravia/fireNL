@@ -391,7 +391,7 @@ to-report burned-clusters [days]
   let cluster-sizes []
   if member? ticks eval-burned-clusters-list [
     let month-burned patches with [last-fire-time >= ticks - days] ;
-    print (word "Ticks: " ticks " month-burned: " month-burned)
+    print (word "Ticks: " ticks " burned since " days " : " month-burned)
     if any? month-burned [
       ask month-burned [ set cluster-label 0 ]
       set month-burned sort month-burned
@@ -472,7 +472,7 @@ to deforestation [ prob ]
     ;print word "Deforestation number: " deforest-forest
     ask up-to-n-of deforest-forest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
       ;;show "Before deforest"
-      let ext-neig random-poisson  ceiling ( max-pxcor / 50 )     ;; Extended von neumann neighborhood radius
+      let ext-neig random-poisson  ceiling ( max-pxcor / deforestation-neigh-factor )     ;; Extended von neumann neighborhood radius = 50
       let ext-von-neumann von-neumann-offsets ext-neig false      ;; Extendend von neumann neighborhood list of patches
 
       let one-not-deforested one-of  patches at-points ext-von-neumann with [not deforested ]
@@ -552,8 +552,8 @@ to deforestation-roads [ prob ]
             stop
           ]
           [
-            if random-float 1 < 0.3 [
-              fd random-poisson  ceiling ( max-pxcor / 50 )
+            if random-float 1 < 0.3 [                                ;; With probability = 0.3 the are holes in the deforestation line
+              fd random-poisson  ceiling ( max-pxcor / deforestation-neigh-factor )          ;; Step to not produce a countinuos deforestation line = Extended von neumann neighborhood radius
             ]
           ]
 
@@ -575,7 +575,12 @@ end
 
 
 to-report von-neumann-offsets [n include-center?]
-  let result [list pxcor pycor] of patches with [abs pxcor + abs pycor <= n]
+
+  let result [list (- pxcor) (- pycor)] of patches with [abs pxcor + abs pycor  <= n]
+  set result sentence [list (pxcor) (pycor)] of patches with [abs pxcor + abs pycor  <= n] result
+  set result sentence [list (- pxcor) (pycor)] of patches with [abs pxcor + abs pycor  <= n] result
+  set result sentence [list (pxcor) (- pycor)] of patches with [abs pxcor + abs pycor  <= n] result
+  set result remove-duplicates result
   ifelse include-center?
     [ report result ]
     [ report remove [0 0] result ]
@@ -584,11 +589,11 @@ end
 GRAPHICS-WINDOW
 275
 10
-778
-514
+783
+519
 -1
 -1
-1.1
+2.0
 1
 10
 1
@@ -599,9 +604,9 @@ GRAPHICS-WINDOW
 0
 1
 0
-449
+249
 0
-449
+249
 1
 1
 1
@@ -636,9 +641,9 @@ HORIZONTAL
 
 BUTTON
 90
-135
+175
 159
-171
+211
 go
 go
 T
@@ -653,9 +658,9 @@ NIL
 
 BUTTON
 12
-135
+175
 82
-171
+211
 setup
 setup
 NIL
@@ -681,9 +686,9 @@ video
 
 BUTTON
 11
-178
+218
 118
-211
+251
 Stop Video
 set parar true
 NIL
@@ -697,15 +702,15 @@ NIL
 1
 
 SLIDER
-10
-225
-240
-258
+15
+260
+245
+293
 Fire-probability
 Fire-probability
 0
 .00001
-6.37351047887701E-6
+2.60275590508084E-6
 .0000001
 1
 NIL
@@ -757,25 +762,25 @@ Save-view
 -1000
 
 SLIDER
-10
-310
-182
-343
+15
+345
+187
+378
 Forest-growth
 Forest-growth
 0
 6000
-1720.0
+1760.0
 10
 1
 NIL
 HORIZONTAL
 
 SLIDER
-10
-270
-242
-303
+15
+305
+247
+338
 forest-dispersal-distance
 forest-dispersal-distance
 1.01
@@ -799,9 +804,9 @@ Percent-forest
 
 SWITCH
 15
-370
+390
 142
-403
+423
 Periodicity
 Periodicity
 1
@@ -810,9 +815,9 @@ Periodicity
 
 SLIDER
 15
-415
+435
 255
-448
+468
 increase-fire-prob-seasonality
 increase-fire-prob-seasonality
 0
@@ -854,9 +859,9 @@ median-fire-interval
 
 SLIDER
 15
-460
+480
 187
-493
+513
 days-fire-season
 days-fire-season
 0
@@ -906,7 +911,7 @@ INPUTBOX
 517
 740
 eval-burned-clusters
-[14671]
+[14673]
 1
 0
 String
@@ -978,7 +983,7 @@ deforestation-prob
 deforestation-prob
 0
 .0001
-1.0E-5
+2.0E-5
 0.000001
 1
 NIL
@@ -993,7 +998,7 @@ probability-of-spread
 probability-of-spread
 0
 1
-0.5
+0.3
 .01
 1
 NIL
@@ -1031,7 +1036,7 @@ BUTTON
 687
 773
 SetupOnePatch
-ask patches [ set deforested false set pcolor green]\nask patch 75 75 [ set deforested true set pcolor black ]
+ask patches [ set deforested false set pcolor green]\nask patch (world-width / 2) (world-height / 2) [ set deforested true set pcolor black ]
 NIL
 1
 T
@@ -1069,6 +1074,21 @@ initial-highway-deforestation
 0
 1
 -1000
+
+SLIDER
+10
+130
+235
+163
+deforestation-neigh-factor
+deforestation-neigh-factor
+0
+100
+50.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
