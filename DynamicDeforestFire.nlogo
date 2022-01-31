@@ -236,7 +236,7 @@ to grow-forest
     ask max-one-of patches in-radius effective-dispersal [distance self][
       ;show "max-one"
       ;;show (word "in-radius eff-disp " effective-dispersal " - Real distance " distance myself)
-      if (pcolor = black or pcolor = col-burned) and ( ticks - deforested-time > 1095 or not deforested) and ( ticks - last-fire-time > 1095) [
+      if (pcolor = black or pcolor = col-burned) and ( ticks - deforested-time > 2555 or not deforested) and ( ticks - last-fire-time > 2555) [                ;; Assuming 7 years for forest recovery @Brando2019
          ;;show "growth forest"
          set deforested false
          set pcolor green
@@ -714,7 +714,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-4.91005809778419E-7
+2.9375325935661257E-6
 .0000001
 1
 NIL
@@ -987,7 +987,7 @@ deforestation-prob
 deforestation-prob
 0
 .0001
-0.0
+1.0E-5
 0.000001
 1
 NIL
