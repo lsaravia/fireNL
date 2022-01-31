@@ -281,6 +281,10 @@ to-report active-burned
   report (count patches with [pcolor = red]) / total-forest
 end
 
+to-report percent-degraded
+  report (count patches with [pcolor = col-burned and deforested]) / total-forest
+end
+
 to-report median-fire-interval
   let p-with-fire patches with [ last-fire-time > (ticks - 7300 ) and number-of-fires > 2]
   ifelse any? p-with-fire [
@@ -620,7 +624,7 @@ MONITOR
 350
 percent burned
 percent-burned * 100
-4
+2
 1
 11
 
@@ -710,7 +714,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-2.60275590508084E-6
+4.91005809778419E-7
 .0000001
 1
 NIL
@@ -785,7 +789,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 100
-1.2
+40.25
 0.01
 1
 NIL
@@ -797,8 +801,8 @@ MONITOR
 915
 405
 Percent Forest
-Percent-forest
-4
+Percent-forest * 100
+2
 1
 11
 
@@ -884,10 +888,10 @@ Data/Estimated_bF.csv
 String
 
 MONITOR
-805
-585
-1007
-630
+765
+610
+967
+655
 Date
 Date
 17
@@ -983,7 +987,7 @@ deforestation-prob
 deforestation-prob
 0
 .0001
-2.0E-5
+0.0
 0.000001
 1
 NIL
@@ -1089,6 +1093,17 @@ deforestation-neigh-factor
 1
 NIL
 HORIZONTAL
+
+MONITOR
+800
+525
+927
+570
+Percent Degraded
+percent-degraded * 100
+2
+1
+11
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
