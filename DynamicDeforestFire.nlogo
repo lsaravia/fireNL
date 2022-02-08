@@ -714,7 +714,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-2.9375325935661257E-6
+4.346783034618471E-7
 .0000001
 1
 NIL
@@ -773,9 +773,9 @@ SLIDER
 Forest-growth
 Forest-growth
 0
-6000
-1760.0
-10
+7000
+6425.0
+5
 1
 NIL
 HORIZONTAL
@@ -789,7 +789,7 @@ forest-dispersal-distance
 forest-dispersal-distance
 1.01
 100
-40.25
+19.83
 0.01
 1
 NIL
@@ -987,7 +987,7 @@ deforestation-prob
 deforestation-prob
 0
 .0001
-1.0E-5
+1.5E-5
 0.000001
 1
 NIL
@@ -1002,7 +1002,7 @@ probability-of-spread
 probability-of-spread
 0
 1
-0.3
+0.2
 .01
 1
 NIL
@@ -1028,7 +1028,7 @@ fire-dispersal-distance
 fire-dispersal-distance
 1.01
 100
-11.0
+11.68
 0.01
 1
 NIL
@@ -1075,7 +1075,7 @@ SWITCH
 123
 initial-highway-deforestation
 initial-highway-deforestation
-0
+1
 1
 -1000
 
@@ -1102,6 +1102,17 @@ MONITOR
 Percent Degraded
 percent-degraded * 100
 2
+1
+11
+
+MONITOR
+480
+560
+652
+605
+Fire power law exponent
+powexp-fire
+4
 1
 11
 
