@@ -474,7 +474,11 @@ to deforestation [ prob ]
 
   while [count-deforest < deforest-forest ][
     ;print word "Deforestation number: " deforest-forest
-    ask up-to-n-of deforest-forest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
+
+    let ask-deforest deforest-forest - count-deforest
+    ;;let uptonof-deforest up-to-n-of ask-deforest patches with [deforested and  ( member? true [not deforested] of neighbors4 )]
+    ;;print (word " uptonof-deforest: " uptonof-deforest " deforest-forest: " deforest-forest " count-deforest: " count-deforest )
+    ask up-to-n-of ask-deforest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
       ;;show "Before deforest"
       let ext-neig random-poisson  ceiling ( max-pxcor / deforestation-neigh-factor )     ;; Extended von neumann neighborhood radius = 50
       let ext-von-neumann von-neumann-offsets ext-neig false      ;; Extendend von neumann neighborhood list of patches
@@ -486,10 +490,11 @@ to deforestation [ prob ]
           set deforested true
           set deforested-time ticks   ;
           set pcolor black
+          set count-deforest count-deforest + 1
         ]
       ]
     ]
-    set count-deforest count patches with [deforested]
+    ;print (word "After deforest-forest: " deforest-forest " count-deforest: " count-deforest )
 
   ]
 end
@@ -637,7 +642,7 @@ Initial-deforested-density
 Initial-deforested-density
 0.0
 1
-0.05
+0.1
 0.001
 1
 NIL
@@ -714,7 +719,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-4.346783034618471E-7
+6.376698828291156E-7
 .0000001
 1
 NIL
@@ -987,7 +992,7 @@ deforestation-prob
 deforestation-prob
 0
 .0001
-1.5E-5
+1.0E-6
 0.000001
 1
 NIL
@@ -1002,7 +1007,7 @@ probability-of-spread
 probability-of-spread
 0
 1
-0.2
+0.5
 .01
 1
 NIL
@@ -1075,7 +1080,7 @@ SWITCH
 123
 initial-highway-deforestation
 initial-highway-deforestation
-1
+0
 1
 -1000
 
