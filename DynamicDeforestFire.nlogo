@@ -480,7 +480,7 @@ to deforestation [ prob ]
     ;;print (word " uptonof-deforest: " uptonof-deforest " deforest-forest: " deforest-forest " count-deforest: " count-deforest )
     ask up-to-n-of ask-deforest patches with [deforested and  ( member? true [not deforested] of neighbors4 )][
       ;;show "Before deforest"
-      let ext-neig random-poisson  ceiling ( max-pxcor / deforestation-neigh-factor )     ;; Extended von neumann neighborhood radius = 50
+      let ext-neig random-poisson  deforestation-neigh-factor      ;; Extended von neumann neighborhood radius = 50
       let ext-von-neumann von-neumann-offsets ext-neig false      ;; Extendend von neumann neighborhood list of patches
 
       let one-not-deforested one-of  patches at-points ext-von-neumann with [not deforested ]
@@ -562,7 +562,7 @@ to deforestation-roads [ prob ]
           ]
           [
             if random-float 1 < 0.3 [                                ;; With probability = 0.3 the are holes in the deforestation line
-              fd random-poisson  ceiling ( max-pxcor / deforestation-neigh-factor )          ;; Step to not produce a countinuos deforestation line = Extended von neumann neighborhood radius
+              fd random-poisson  deforestation-neigh-factor           ;; Step to not produce a countinuos deforestation line = Extended von neumann neighborhood radius
             ]
           ]
 
@@ -1093,7 +1093,7 @@ deforestation-neigh-factor
 deforestation-neigh-factor
 0
 100
-50.0
+5.0
 1
 1
 NIL
