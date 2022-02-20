@@ -283,13 +283,20 @@ to set-fire-prob-by-month
     if last-mes != new-mes [
       set last-mes new-mes
       ifelse use-fire-prob-se [
-        let fire-prob-mean ln item accum-mes fire-prob-list                                   ; prediction model has ln scale
-        let fire-prob-se item accum-mes fire-prob-list-se                                     ; se was not exponentiated so no convertion is needed
-        set fire-probability exp ( random-normal fire-prob-mean fire-prob-se ) / 30           ; Monthly probability have to be divided by 30
-        ;print (word "mes: " accum-mes " fire-prob: " fire-probability " Fire-prob-mean: " fire-prob-mean  " Fire-prob-se: " fire-prob-se " Fecha: " ( time:show tick-date "yyyy-MM-dd" ))
+        ;let fire-prob-mean ln item accum-mes fire-prob-list                                   ; prediction model has ln scale
+        ;let fire-prob-se item accum-mes fire-prob-list-se                                     ; se was not exponentiated so no convertion is needed
+        ;set fire-probability exp ( random-normal fire-prob-mean fire-prob-se ) / 30           ; Monthly probability have to be divided by 30
+        let fire-prob-mean item accum-mes fire-prob-list                                   ; prediction model
+        ifelse member? new-mes [ 8 9 10 ] [
+          set fire-probability ( fire-prob-mean +  random-gamma 1.421544  13736.42  ) / 30          ; Addittional variance estimated from data !!!!!!!!!!!!!!!!!!
+        ][
+          set fire-probability fire-prob-mean / 30
+        ]
+        ;print (word "accum-mes: " accum-mes " mes: " new-mes " fire-prob: " fire-probability " Fire-prob-mean: " ( fire-prob-mean / 30)  " Fecha: " ( time:show tick-date "yyyy-MM-dd" ))
 
       ][
         set fire-probability item accum-mes fire-prob-list / 30           ; Monthly probability have to be divided by 30
+        ;print (word "accum-mes: " accum-mes " mes: " new-mes " fire-prob: " fire-probability " Fecha: " ( time:show tick-date "yyyy-MM-dd" ))
       ]
       set burned-by-month  actual-burned
       set actual-burned 0
@@ -526,7 +533,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-2.0E-6
+7.063682519897192E-7
 .0000001
 1
 NIL
@@ -694,7 +701,7 @@ INPUTBOX
 257
 670
 fire-prob-filename
-Data/Estimated_bF.ppp
+Data/EstimatedGam_bF.csv
 1
 0
 String
@@ -739,7 +746,7 @@ SWITCH
 643
 use-fire-prob-se
 use-fire-prob-se
-1
+0
 1
 -1000
 
