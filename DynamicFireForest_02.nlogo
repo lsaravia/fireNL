@@ -816,55 +816,92 @@ NIL
 HORIZONTAL
 
 @#$#@#$#@
-## ACKNOWLEDGMENT
+# ODD 
 
-## WHAT IS IT?
+## 1. Purpose and patterns
 
-This model simulates the spread of a fire through a forest.  It shows that the fire's chance of reaching the right edge of the forest depends critically on the density of trees. This is an example of a common feature of complex systems, the presence of a non-linear threshold or critical parameter.
+The purpose of this model is to simulate forest fire dynamics. It models forest growth, ignition and spread of fires, and resulting patterns of burned areas over time. The model can be used to understand factors affecting fire regime characteristics like fire size, fire frequency, and spatial patterns of burning.
 
-## HOW IT WORKS
+## 2. Entities, state variables, and scales
 
-## HOW TO USE IT
+The model contains the following entities:
 
-Click the SETUP button to set up the trees (green) and fire (red on the left-hand side).
+- **Patches:** Represents square land units (forest stands). State variables include:
+    - `pcolor`: Color of the patch (green = forest, red = burning, darkened red = burned)  
+    - `last_fire_time`: Timestep when the patch last burned
+    - `fire_interval`: Time interval between last two fires on the patch 
+    - `number_of_fires`: Total number of fires experienced by the patch
+    - `cluster_label`: Label assigned during burned cluster detection
 
-Click the GO button to start the simulation.
+- **Globals:**
+    - `fire_patches`: Total number of ignitions per timestep
+    - `powexp`: Exponent for dispersal kernel
+    - `forest_growth_prob`: Probability of forest growth
+    - `total_forest`: Total number of forest patches 
+    - `f_prob`: Expected number of ignitions per timestep
+    - `start_fire_season`: Start month of high fire season  
+    - `end_fire_season`: End month of high fire season
+    - `fire_prob_list`: Monthly fire ignition probabilities read from file
+    - `burned_by_month`: Total area burned each timestep
+    - `tick_date`: Tick corresponding to calendar date
+    - `eval_burned_clusters_list`: Ticks when to evaluate burned clusters
+    - `col_burned`: Color assigned to burned patches
 
-The DENSITY slider controls the density of trees in the forest. (Note: Changes in the DENSITY slider do not take effect until the next SETUP.)
+The model represents a forest landscape with each patch representing a forest stand. The spatial resolution is user-defined based on world dimensions (e.g. 500x500 cells for a 250,000 ha landscape with 0.5 ha patches).
 
-## THINGS TO NOTICE
+The temporal resolution is monthly time steps. Simulations can be run for any user-defined time period.
 
+## 3. Process overview and scheduling
 
-## THINGS TO TRY
+The model processes are scheduled in the following order each timestep:
 
+1. Forest growth - each forest patch has a probability of dispersing seeds and growing new trees in the neighborhood.
 
-## EXTENDING THE MODEL
+2. Fire ignition - number of random fire ignitions is drawn from a Poisson distribution based on current fire probability. Ignition patches turn red.
 
+3. Fire spread - burning patches have a probability of spreading to neighboring forest patches, turning them red. Spread continues until no more active fire edges exist. 
 
-## NETLOGO FEATURES
+4. Burned area calculation - count total burned area this timestep.
 
-The `neighbors4` primitive is used to spread the fire.
+5. Update fire properties - update last fire time, intervals, totals on burned patches.  
 
+6. Increment clock by one month.
 
-## RELATED MODELS
+Additionally, at the beginning of each fire season the monthly fire ignition probability is updated based on input data files.
 
-Fire, Percolation, Rumor Mill
+The schedule represents discrete time steps proceeding in chronological order for the duration of the run.
 
-## CREDITS AND REFERENCES
+## 4. Design concepts
 
-This model is based on:
+**Basic principles:** The model is based on the conceptualization of forest fire regimes as interactions between fuel availability, ignition patterns, and weather/climate conditions over time. Local fire spread is based on a simple fire contagion mechanism.
 
-* Wilensky, U. (1997).  NetLogo Fire model.  http://ccl.northwestern.edu/netlogo/models/Fire.  Center for Connected Learning and Computer-Based Modeling, Northwestern University, Evanston, IL.
+**Emergence:** The total area burned each timestep and the spatial pattern of burning emerge from the ignition locations and local spread dynamics. The distribution of fire intervals and fire sizes emerge from the ignition and spread processes over time.
 
-## HOW TO CITE
+**Stochasticity:** Fire ignitions are determined stochastically from a Poisson distribution based on monthly probabilities. Fire spread from cell to cell occurs stochastically based on the fire spread probability. Forest growth involves stochastic dispersal distance.
 
-## COPYRIGHT AND LICENSE
+**Observation:** The following output data are recorded: percentage of landscape burned each timestep, histogram of fire intervals, histogram of fire sizes (cluster analysis), and optionally the state of each cell can be exported to file at specified intervals.
 
-Copyright 2020 Leonardo A. Saravia
+## 5. Initialization
 
-![CC BY-NC-SA 3.0](http://ccl.northwestern.edu/images/creativecommons/byncsa.png)
+At model initialization, each patch is forested with a probability set by the `initial_forest_density` slider. All fire data attributes are set to zero. The fire ignition probability, fire spread probability, and fire season parameters are set based on user inputs. The starting date is set to January 2001.
 
-This work is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 License.  To view a copy of this license, visit https://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to Creative Commons, 559 Nathan Abbott Way, Stanford, California 94305, USA.
+## 6. Input data
+
+The model uses an input data file containing monthly fire ignition probabilities. This allows representing empirical estimates or modeled projections of how fire likelihood varies over time.
+
+## 7. Submodels
+
+- **Burn-patch** - Changes patch color to red, updates fire interval, last fire time, and number of fires.
+
+- **Grow-forest** - Each forest patch has a probability of dispersing seeds and turning a random distant patch within dispersal range green. Dispersal distance follows a power law distribution based on user input mean.
+
+- **Random-power-law-distance** - Returns a random number drawn from a power law distribution with given xmin and exponent alpha. Used to generate dispersal distances. 
+
+- **Read-fire-prob** - Reads monthly fire probability values from an external CSV file.
+
+- **Set-fire-prob-by-month** - Samples the fire probability for the current month from the input data, incorporating uncertainty if fire probability standard errors were provided.
+
+- **Burned-clusters** - Performs cluster analysis on recently burned patches using a Hoshen-Kopelman algorithm. Reports list of burned cluster sizes.
 @#$#@#$#@
 default
 true
