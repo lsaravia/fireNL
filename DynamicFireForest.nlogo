@@ -20,6 +20,7 @@ globals [
   accum-mes
   eval-burned-clusters-list        ; list with the ticks to eval burned clusters
   col-burned                       ; color of the burned patches
+  prev-year                        ;
 ]
 
 patches-own [
@@ -160,7 +161,11 @@ to go
     set pcolor col-burned ;; once the tree is burned, darken its color
   ]
   tick
-  count-fires-export
+
+  if video [
+    vid:record-view
+  ]
+
 ;; advance the clock by one “tick”
 end
 
@@ -177,6 +182,16 @@ end
 
 
 to grow-forest
+  if time:is-after? tick-date (time:create "2021-12-31") [
+    let actual-year time:get "year" tick-date
+    if actual-year != prev-year [
+      set forest-growth forest-growth * (  decrease-forest-growth )
+      set forest-growth-prob 1 / forest-growth
+      set prev-year actual-year
+      show (word "prev-year " prev-year " - Actual year " actual-year " Forest-growth: " forest-growth)
+    ]
+  ]
+
   if random-float 1 < forest-growth-prob
   [
     let effective-dispersal  random-power-law-distance 1 powexp
@@ -198,20 +213,16 @@ to-report random-power-law-distance [ xmin alpha ]
 end
 
 to count-fires-export
-  let mes (ticks mod 30)
+  ;let mes (ticks mod 30)
 
-  if video [
-    ;vid:record-interface
-    vid:record-view
-  ]
 
-  if ticks > 7200 and mes = 0 [
-    if save-view [
-    ;print (word "Modulo Ticks : " mes " - " ticks)
-      let fname (word "Data/Fire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
-      csv:to-file fname   [ (list pycor pxcor pcolor) ] of patches
-    ]
-  ]
+  ;if ticks > 7200 and mes = 0 [
+  ;  if save-view [
+  ;  ;print (word "Modulo Ticks : " mes " - " ticks)
+  ;    let fname (word "Data/Fire_" initial-forest-density "_" fire-probability "_" forest-dispersal-distance "_" forest-growth "_" ticks "_" world-height "_" world-width ".txt")
+  ;    csv:to-file fname   [ (list pycor pxcor pcolor) ] of patches
+  ;  ]
+  ;]
 end
 
 to-report percent-burned
@@ -519,14 +530,14 @@ NIL
 
 SLIDER
 10
-195
+200
 240
-228
+233
 Fire-probability
 Fire-probability
 0
 .00001
-2.0E-6
+1.3522833581804493E-6
 .0000001
 1
 NIL
@@ -553,14 +564,14 @@ PENS
 
 SLIDER
 11
-149
+154
 183
-182
+187
 end-simulation
 end-simulation
 7200
 14760
-14973.0
+30225.0
 360
 1
 NIL
@@ -579,14 +590,14 @@ Save-view
 
 SLIDER
 10
-295
+300
 182
-328
+333
 Forest-growth
 Forest-growth
 0
 6000
-2000.0
+5809.553
 10
 1
 NIL
@@ -594,14 +605,14 @@ HORIZONTAL
 
 SLIDER
 10
-250
+255
 242
-283
+288
 forest-dispersal-distance
 forest-dispersal-distance
 1.01
 100
-1.01
+2.00831
 0.01
 1
 NIL
@@ -619,10 +630,10 @@ Percent-forest
 11
 
 SWITCH
-15
-370
-142
-403
+10
+390
+137
+423
 Periodicity
 Periodicity
 1
@@ -630,10 +641,10 @@ Periodicity
 -1000
 
 SLIDER
-15
-415
-255
-448
+10
+435
+250
+468
 increase-fire-prob-seasonality
 increase-fire-prob-seasonality
 0
@@ -674,10 +685,10 @@ median-fire-interval
 11
 
 SLIDER
-15
-460
-187
-493
+10
+480
+182
+513
 days-fire-season
 days-fire-season
 0
@@ -694,7 +705,7 @@ INPUTBOX
 257
 670
 fire-prob-filename
-Data/Estimated_bF.ppp
+Data/Predicted_bF_rcp45_def.csv
 1
 0
 String
@@ -807,6 +818,21 @@ false
 "" ""
 PENS
 "default" 1.0 0 -16777216 true "" "plot median-fire-interval\nif ticks > 7300 \n[\n  ; scroll the range of the plot so\n  ; only the last 200 ticks are visible\n  set-plot-x-range (ticks - 7300) ticks \n]\n"
+
+SLIDER
+10
+345
+212
+378
+decrease-forest-growth
+decrease-forest-growth
+0
+1
+1.0
+.01
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## ACKNOWLEDGMENT
@@ -1141,7 +1167,7 @@ false
 Polygon -7500403 true true 270 75 225 30 30 225 75 270
 Polygon -7500403 true true 30 75 75 30 270 225 225 270
 @#$#@#$#@
-NetLogo 6.2.0
+NetLogo 6.4.0
 @#$#@#$#@
 set density 60.0
 setup
