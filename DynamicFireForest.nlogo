@@ -188,7 +188,7 @@ to grow-forest
       set forest-growth forest-growth * (  decrease-forest-growth )
       set forest-growth-prob 1 / forest-growth
       set prev-year actual-year
-      show (word "prev-year " prev-year " - Actual year " actual-year " Forest-growth: " forest-growth)
+      ;show (word "prev-year " prev-year " - Actual year " actual-year " Forest-growth: " forest-growth)
     ]
   ]
 
@@ -537,7 +537,7 @@ Fire-probability
 Fire-probability
 0
 .00001
-1.3522833581804493E-6
+2.6968606315264348E-6
 .0000001
 1
 NIL
@@ -828,7 +828,7 @@ decrease-forest-growth
 decrease-forest-growth
 0
 1
-1.0
+0.97
 .01
 1
 NIL
