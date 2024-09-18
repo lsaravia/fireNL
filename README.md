@@ -1,28 +1,30 @@
-# Modelos dinámicos de fuegos en NetLogo 
+# Modelos dinámicos de fuegos en NetLogo
 
-* **FirePrende.nlogo** Es un modelo en que se selecciona la probabilidad de ocupacion del area y se puede usar el mouse para prender o apagar el fuego en distintos sitios. Tambien se puede grabar un video del area de modelado. **FirePrendeNoVid.nlogo" Desactiva la extension de video para que pueda ser usado directamente desde la web con este link:
+* **FirePrende.nlogo**: Es un modelo en el que se selecciona la probabilidad de ocupación del área, y se puede usar el mouse para encender o apagar el fuego en distintos sitios. También permite grabar un video del área modelada. La versión **FirePrendeNoVid.nlogo** desactiva la extensión de video para que pueda ser utilizada directamente desde la web con el siguiente enlace:
 
-<http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/FirePrendeNoVid.nlogo>
+   <http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/FirePrendeNoVid.nlogo>
 
-* **DynamicFire.nlogo** Es un modelo de fuego dinámico, con un sustrato fijo donde puede crecer la de vegetacion, es decir que hay una probabilidad maxima de cobertura de vegetación. Luego hay una probabilidad de ignicion de fuegos que es usualmente muy baja, y una tasa de crecimiento/recuperacion de la vegetación despues del fuego. El modelo puede guardar un archivo csv con la configuracion espacial a distintos momentos temporales, y tambien puede grabar un video. La version **DynamicFireWeb.nlogo** elimina las extensiones de video y csv para poder ser usado desde la web a partir de este link
+* **DynamicFire.nlogo**: Es un modelo de fuego dinámico, con un sustrato fijo donde puede crecer vegetación, es decir, hay una probabilidad máxima de cobertura de vegetación. Además, hay una probabilidad de ignición de fuegos, usualmente baja, y una tasa de crecimiento/recuperación de la vegetación después del fuego. El modelo puede guardar un archivo CSV con la configuración espacial en distintos momentos temporales y también permite grabar un video. La versión **DynamicFireWeb.nlogo** elimina las extensiones de video y CSV para ser utilizada desde la web mediante este enlace:
 
-	<http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/DynamicFireWeb.nlogo>
+   <http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/DynamicFireWeb.nlogo>
 
-	* **DynamicFireAnalysis.Rmd** Es una análisis preliminar del comportamiento del modelo con distintos parámetros. 
+   * **DynamicFireAnalysis.Rmd**: Es un análisis preliminar del comportamiento del modelo con distintos parámetros.
 
-	* **PresentacionDOCNA.Rmd** Son los slides de una presentación realizada para el curso de Ecología de Bosques 
+   * **PresentacionDOCNA.Rmd**: Son los slides de una presentación realizada para el curso de Ecología de Bosques.
 
-* **DynamicFireForest.nlogo** Es un modelo de fuego dinámico con crecimiento dinámico de la vegetacion. Hay una probabilidad de ignicion de fuegos que es usualmente muy baja,  una tasa de crecimiento/recuperacion de la vegetación despues del fuego, una distancia de dispersion de la vegatación con una distribución power, y la posibilidad de agregar una variación anual en la tasa de ignición con una distribución de probabilides gamma.  El modelo registra el intervalo de retorno de fuegos por parche. 
+* **DynamicFireForest.nlogo**: Es un modelo de fuego dinámico con crecimiento de vegetación. Incluye una probabilidad de ignición de fuegos, una tasa de crecimiento/recuperación de la vegetación después del fuego, una distancia de dispersión de la vegetación con una distribución tipo power-law, y la posibilidad de agregar variación anual en la tasa de ignición usando una distribución gamma. El modelo registra el intervalo de retorno de fuegos por parche.
 
-* **DynamicDeforestFire.nlogo** A model of fire after deforestation with the following structure: 
-	
-	1) Forest growth: forest sites produce with probability P another forest site and send it to distance given by a power-law distribution with exponent DE (same as previous), if the target site was deforested < 3 years or burned < 3 years ago the forest do not growth. 
+* **DynamicDeforestFire.nlogo**: Es un modelo de fuego post-deforestación con la siguiente estructura:
 
-	2) Deforestation: deforestation grows from 4 nearest neighbors with a probability D
+   1) **Crecimiento del bosque**: Los sitios forestales producen con probabilidad P otro sitio forestal, enviándolo a una distancia dada por una distribución power-law con exponente DE (igual que en el anterior). Si el sitio objetivo fue deforestado o quemado hace menos de 3 años, el bosque no crece.
 
-	3) Ignition: We take a random deforested site an set it on fire with probability f(t)
+   2) **Deforestación**: La deforestación se propaga desde los 4 vecinos más cercanos con una probabilidad D.
 
-	4) Fire spread: a) fire can spread to neighbors sites with probability 1 if they are deforested > 365 days ago, or they are deforested and had a fire > 365 days ago. b) fire can spread to non-deforested sites with probability S at a distance given by a power-law distribution with exponent DS. It can be fire inside intact forest but it is more probable near fires produced by deforestation.
+   3) **Ignición**: Se selecciona un sitio deforestado al azar y se incendia con una probabilidad f(t).
 
-	5) Patches on fire in the previous step become burned. 
+   4) **Propagación del fuego**: 
+      a) El fuego puede propagarse a los sitios vecinos con probabilidad 1 si han sido deforestados hace más de 365 días o quemados hace más de 365 días.  
+      b) El fuego puede propagarse a sitios no deforestados con una probabilidad S, a una distancia dada por una distribución power-law con exponente DS. El fuego puede propagarse dentro de bosques intactos, pero es más probable cerca de incendios originados por la deforestación.
+
+   5) Los parches que estuvieron en llamas en el paso anterior se consideran quemados.
 
