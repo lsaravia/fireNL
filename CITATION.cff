@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+title: FireNL
+message: "If you use this software, please cite it using the metadata below."
+type: software
+authors:
+  - family-names: Saravia
+    given-names: Leonardo A.
+repository-code: https://github.com/lsaravia/fireNL
+license: MIT
+version: 2.0.0
+date-released: 2026-08-04
