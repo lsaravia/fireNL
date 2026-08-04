@@ -1,30 +1,86 @@
-# Modelos dinámicos de fuegos en NetLogo
+# FireNL: Modelos dinámicos de fuego en NetLogo
 
-* **FirePrende.nlogo**: Es un modelo en el que se selecciona la probabilidad de ocupación del área, y se puede usar el mouse para encender o apagar el fuego en distintos sitios. También permite grabar un video del área modelada. La versión **FirePrendeNoVid.nlogo** desactiva la extensión de video para que pueda ser utilizada directamente desde la web con el siguiente enlace:
+[![DOI](https://zenodo.org/badge/301216269.svg)](https://doi.org/10.5281/zenodo.5703538)
 
-   <http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/FirePrendeNoVid.nlogo>
 
-* **DynamicFire.nlogo**: Es un modelo de fuego dinámico, con un sustrato fijo donde puede crecer vegetación, es decir, hay una probabilidad máxima de cobertura de vegetación. Además, hay una probabilidad de ignición de fuegos, usualmente baja, y una tasa de crecimiento/recuperación de la vegetación después del fuego. El modelo puede guardar un archivo CSV con la configuración espacial en distintos momentos temporales y también permite grabar un video. La versión **DynamicFireWeb.nlogo** elimina las extensiones de video y CSV para ser utilizada desde la web mediante este enlace:
+**FireNL** es una colección de modelos espaciales estocásticos desarrollados en **NetLogo** para estudiar la dinámica de incendios forestales, la recuperación de la vegetación y la interacción entre fuego, deforestación y procesos de regeneración del bosque.
 
-   <http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/DynamicFireWeb.nlogo>
+Los modelos están orientados tanto a la investigación científica como a la docencia en ecología, sistemas complejos y modelado basado en agentes.
 
-   * **DynamicFireAnalysis.Rmd**: Es un análisis preliminar del comportamiento del modelo con distintos parámetros.
+## Modelos incluidos
 
-   * **PresentacionDOCNA.Rmd**: Son los slides de una presentación realizada para el curso de Ecología de Bosques.
+### FirePrende
 
-* **DynamicFireForest.nlogo**: Es un modelo de fuego dinámico con crecimiento de vegetación. Incluye una probabilidad de ignición de fuegos, una tasa de crecimiento/recuperación de la vegetación después del fuego, una distancia de dispersión de la vegetación con una distribución tipo power-law, y la posibilidad de agregar variación anual en la tasa de ignición usando una distribución gamma. El modelo registra el intervalo de retorno de fuegos por parche.
+Modelo interactivo para explorar la propagación del fuego sobre un paisaje estático.
 
-* **DynamicDeforestFire.nlogo**: Es un modelo de fuego post-deforestación con la siguiente estructura:
+Características:
 
-   1) **Crecimiento del bosque**: Los sitios forestales producen con probabilidad P otro sitio forestal, enviándolo a una distancia dada por una distribución power-law con exponente DE (igual que en el anterior). Si el sitio objetivo fue deforestado o quemado hace menos de 3 años, el bosque no crece.
+- selección de la cobertura inicial de vegetación;
+- ignición y extinción mediante el mouse;
+- grabación de videos de la simulación.
 
-   2) **Deforestación**: La deforestación se propaga desde los 4 vecinos más cercanos con una probabilidad D.
+La versión **FirePrendeNoVid.nlogo** elimina la extensión de video para ejecutarse directamente en NetLogo Web:
 
-   3) **Ignición**: Se selecciona un sitio deforestado al azar y se incendia con una probabilidad f(t).
+http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/FirePrendeNoVid.nlogo
 
-   4) **Propagación del fuego**: 
-      a) El fuego puede propagarse a los sitios vecinos con probabilidad 1 si han sido deforestados hace más de 365 días o quemados hace más de 365 días.  
-      b) El fuego puede propagarse a sitios no deforestados con una probabilidad S, a una distancia dada por una distribución power-law con exponente DS. El fuego puede propagarse dentro de bosques intactos, pero es más probable cerca de incendios originados por la deforestación.
+---
 
-   5) Los parches que estuvieron en llamas en el paso anterior se consideran quemados.
+### DynamicFire
+
+Modelo dinámico donde la vegetación crece continuamente mientras ocurren incendios espontáneos.
+
+Incluye:
+
+- crecimiento y recuperación de la vegetación;
+- ignición estocástica;
+- exportación de configuraciones espaciales en formato CSV;
+- grabación de videos.
+
+La versión **DynamicFireWeb.nlogo** puede ejecutarse desde NetLogo Web:
+
+http://netlogoweb.org/web?https://raw.githubusercontent.com/lsaravia/fireNL/main/DynamicFireWeb.nlogo
+
+Archivos asociados:
+
+- **DynamicFireAnalysis.Rmd**: análisis exploratorio del comportamiento del modelo.
+- **PresentacionDOCNA.Rmd**: presentación utilizada en el curso de Ecología de Bosques.
+
+---
+
+### DynamicFireForest
+
+Modelo de incendios con regeneración espacial del bosque.
+
+Además del crecimiento y recuperación de la vegetación incorpora:
+
+- dispersión a larga distancia mediante una distribución *power-law*;
+- variabilidad interanual en la ignición utilizando una distribución Gamma;
+- registro del intervalo de retorno del fuego para cada parche.
+
+---
+
+### DynamicDeforestFire
+
+Modelo de incendios asociados a procesos de deforestación.
+
+El modelo representa cinco procesos principales:
+
+1. Crecimiento del bosque mediante dispersión de larga distancia.
+2. Expansión espacial de la deforestación.
+3. Ignición de incendios sobre áreas deforestadas.
+4. Propagación del fuego hacia áreas deforestadas y bosques intactos.
+5. Recuperación posterior al incendio.
+
+Este modelo fue desarrollado para estudiar la interacción entre deforestación, incendios y regeneración forestal en paisajes tropicales.
+
+## Publicaciones
+
+Si utiliza alguno de estos modelos en trabajos científicos, por favor cite la publicación correspondiente.
+
+Saravia, L. A., Allhoff, K. T., Bond-Lamberty, B., & Suweis, S. (2025). Modelling Amazon fire regimes under climate change scenarios. Oikos, e10764. https://doi.org/10.1111/oik.10764
+
+### Cómo citar el software
+
+Saravia, L. A. (2026). FireNL (Version 2.0.0). Zenodo.
+https://doi.org/10.5281/zenodo.5703538
 
